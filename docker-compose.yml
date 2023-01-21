@@ -1,0 +1,10 @@
+version: '3'
+services:
+  postgres:
+      image: postgres:14
+      ports:
+        - 5432:5432
+      environment:
+        - POSTGRES_USER=consub_rw
+        - POSTGRES_PASSWORD=localpwd
+        - POSTGRES_DB=consub

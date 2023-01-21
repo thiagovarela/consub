@@ -1,0 +1,1021 @@
+{
+  "db": "PostgreSQL",
+  "05a79152291ccbca0455fd0525de592a26468a083a992b5ceb596caed9b65d25": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "locale",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM blogs.categories\n        WHERE id = $1 and account_id = $2\n        "
+  },
+  "12cc7db463f18e887a3b9f29011825983a3601c9f853badbab66c6b55e3f74f6": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO accounts.accounts (name, subdomain)\n        VALUES ($1, $2)\n        RETURNING *\n        "
+  },
+  "150ca1f2ddd51ecd960e176101307ecd10d0026b5b3621dbb01f59f2c1c6faaa": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "public_key",
+          "ordinal": 2,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "secret_key",
+          "ordinal": 3,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT *\n        FROM accounts.account_keys\n        WHERE id = $1\n        "
+  },
+  "1c8e637cfc5c501738bfd1987774647abc8ce9247b8e7208c5a432c172e4fafe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "public_key",
+          "ordinal": 2,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "secret_key",
+          "ordinal": 3,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT *\n        FROM accounts.account_keys\n        WHERE account_id = $1 AND (expires_at is null OR expires_at > now())\n        ORDER BY expires_at DESC\n        "
+  },
+  "1e4bcd2eb187e54f0d38885daf8ae0c0b98d17e663e7c0bc40a7e6fee86bfe21": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "locale",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        UPDATE blogs.categories\n        SET name = coalesce($3, name),\n            slug = coalesce($4, slug),\n            locale = coalesce($5, locale),\n            translation_of = coalesce($6, translation_of)\n        WHERE id = $1 and account_id = $2\n        RETURNING *\n        "
+  },
+  "287d51e625880335000d56542bdb19b0acf6de9a1152e761589ab43d2df62422": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "body",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "featured",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "estimated_reading_time",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 11,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 12,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 13,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM blogs.posts\n        WHERE account_id = $1 AND id = $2\n        "
+  },
+  "38a6f2dcd2cc412f16a5af504f1c58c15762214d9b23322b774f6a85c02d2d44": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "locale",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM blogs.categories\n        WHERE account_id = $1\n        "
+  },
+  "3e5d657af38c89b326dee3a3e1ec39d5ba7d605535395974c8ba085a65b5c94a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO accounts.users (account_id)\n        VALUES ($1)\n        RETURNING id, account_id, created_at, updated_at\n        "
+  },
+  "57c7a12a9887d005063297f9ab89ec3a356b1f58611d3414ff5691187baff03b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "locale",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO blogs.categories (account_id, name, slug, locale, translation_of)\n        VALUES ($1, $2, $3, $4, $5)\n        RETURNING *\n        "
+  },
+  "7ca50692f5431fbc52705d567bcb8adb06346edabe3d60d0da3c7a80c317e65e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT id, account_id, created_at, updated_at\n        FROM accounts.users\n        WHERE id = $1\n        "
+  },
+  "8ac432c21f8b765e17ce22b2cc7cfeba992f29f94fae5f219d9916908a93648e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "public_key",
+          "ordinal": 2,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "secret_key",
+          "ordinal": 3,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "expires_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bytea",
+          "Bytea"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO accounts.account_keys (account_id, public_key, secret_key)\n        VALUES ($1, $2, $3)\n        RETURNING *\n        "
+  },
+  "8e9b96515ddad6f1823fbde9c7f3e914351aa41e9c51f67744433ef24326f4e8": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "body",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "featured",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "estimated_reading_time",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 11,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 12,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 13,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM blogs.posts\n        WHERE account_id = $1 AND locale = coalesce($2, locale)\n        "
+  },
+  "a84708a5cfde68e0e1035c709db2d160d1950664bef90130b33b08fca54f8e78": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "locale",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 4,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 6,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 7,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        DELETE FROM blogs.categories\n        WHERE id = $1 and account_id = $2\n        RETURNING *\n        "
+  },
+  "aa271edccb8cf7c2267e4f9e100da83ca5b29a6dc2e5f0732cfa4a8df8d983fd": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "hash_password",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT user_id, account_id, hash_password\n        FROM accounts.passwords\n        WHERE email = $1 and account_id = $2\n        "
+  },
+  "c96b406a7e45d07ecdf663082cd8c85c3b20727af32f78860b163addc3a25077": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT *\n        FROM accounts.accounts\n        WHERE id = (\n            SELECT account_id\n            FROM accounts.account_keys\n            WHERE id = $1 and (expires_at is null or expires_at > now())\n        )\n        "
+  },
+  "d313b95ace45d91383185667a363ac8c9099f62b86a6f5d43dc7c04e0071cd13": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO accounts.passwords (user_id, account_id, email, hash_password)\n        VALUES ($1, $2, $3, $4)\n        "
+  },
+  "d6a954933bb515cdb07fdef340a990a564fc929e27a7b1e67c0c9841aeee935f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "body",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 6,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 7,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "featured",
+          "ordinal": 8,
+          "type_info": "Bool"
+        },
+        {
+          "name": "estimated_reading_time",
+          "ordinal": 9,
+          "type_info": "Int4"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 11,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 12,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 13,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Text",
+          "Varchar",
+          "Uuid",
+          "Bool",
+          "Int4",
+          "Uuid",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO blogs.posts (account_id, author_id, title, slug, body, locale, category_id, featured, estimated_reading_time, translation_of, published_at)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\n        RETURNING *\n        "
+  },
+  "dcbedfff526d09a3d971011449ddf3eb834ee9f6ecb3fe05b45be36ca77a6bbe": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT *\n        FROM accounts.accounts\n        WHERE subdomain = $1\n        "
+  }
+}

@@ -1,0 +1,19 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tower-http = { version = "0.3", features = ["trace", "limit", "compression-full", "metrics", "sensitive-headers", "timeout", "validate-request", "cors"] }
+
+shared = { path = "../shared" }
+
+accounts = { path = "../apps/accounts" }
+blogs = { path = "../apps/blogs" }

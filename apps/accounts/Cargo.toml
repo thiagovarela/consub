@@ -1,0 +1,32 @@
+[package]
+name = "accounts"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+axum = { workspace = true }
+sqlx = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+thiserror = { workspace = true }
+addr = { workspace = true }
+jsonwebtoken = { workspace = true }
+axum-auth = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }
+slug = { workspace = true }
+validator = { workspace = true }
+serde_with = { workspace = true }
+once_cell = { workspace = true }
+regex = { workspace = true }
+
+ed25519-dalek = "1.0.1"
+rand = "0.7.0"
+argon2 = "0.4.1"
+
+shared = { path = "../../shared" }
