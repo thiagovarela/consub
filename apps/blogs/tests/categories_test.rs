@@ -14,7 +14,6 @@ async fn test_token(pool: &sqlx::PgPool) -> String {
     access_token.token
 }
 
-
 #[sqlx::test(migrations = "../../migrations", fixtures("account"))]
 async fn test_create_a_category(pool: sqlx::PgPool) {
     let token = test_token(&pool).await;
@@ -23,18 +22,18 @@ async fn test_create_a_category(pool: sqlx::PgPool) {
 
     let client = reqwest::Client::new();
 
-    let url = format!("{}/admin/categories", address);
+    let url = format!("{address}/admin/categories");
     let response = client
         .post(url)
         .header("X-API-KEY", "e6af50e6-0ef3-4908-80c0-a83622d96d03")
-        .header("Authorization", format!("Bearer {}", token))
+        .header("Authorization", format!("Bearer {token}"))
         .json(&serde_json::json!({
             "name": "Test Category",
             "locale": "en-US",
         }))
         .send()
         .await
-        .unwrap();    
+        .unwrap();
 
     assert_eq!(response.status(), 201);
 }
@@ -47,18 +46,21 @@ async fn test_update_a_category(pool: sqlx::PgPool) {
 
     let client = reqwest::Client::new();
 
-    let url = format!("{}/admin/categories/{}", address, "e1c312c3-6d9b-42bc-ba15-a550971cdfa4");
+    let url = format!(
+        "{}/admin/categories/{}",
+        address, "e1c312c3-6d9b-42bc-ba15-a550971cdfa4"
+    );
     let response = client
         .patch(url)
         .header("X-API-KEY", "e6af50e6-0ef3-4908-80c0-a83622d96d03")
-        .header("Authorization", format!("Bearer {}", token))
+        .header("Authorization", format!("Bearer {token}"))
         .json(&serde_json::json!({
-            "name": "Testing",            
+            "name": "Testing",
         }))
         .send()
         .await
-        .unwrap();    
-    
+        .unwrap();
+
     let vl = response.json::<serde_json::Value>().await.unwrap();
 
     assert_eq!(vl["name"], "Testing");
@@ -72,18 +74,20 @@ async fn test_delete_category(pool: sqlx::PgPool) {
 
     let client = reqwest::Client::new();
 
-    let url = format!("{}/admin/categories/{}", address, "e1c312c3-6d9b-42bc-ba15-a550971cdfa4");
+    let url = format!(
+        "{}/admin/categories/{}",
+        address, "e1c312c3-6d9b-42bc-ba15-a550971cdfa4"
+    );
     let response = client
         .delete(url)
         .header("X-API-KEY", "e6af50e6-0ef3-4908-80c0-a83622d96d03")
-        .header("Authorization", format!("Bearer {}", token))
+        .header("Authorization", format!("Bearer {token}"))
         .json(&serde_json::json!({
-            "name": "Testing",            
+            "name": "Testing",
         }))
         .send()
         .await
-        .unwrap();    
-    
-        assert_eq!(response.status(), 204);
-}
+        .unwrap();
 
+    assert_eq!(response.status(), 204);
+}

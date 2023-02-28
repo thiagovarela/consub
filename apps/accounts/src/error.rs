@@ -1,25 +1,33 @@
+use aide::OperationIo;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
 };
+use phf::phf_map;
 use serde_with::DisplayFromStr;
 use thiserror::Error;
 use validator::ValidationErrors;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, OperationIo)]
 pub enum Error {
     #[error("Database error")]
-    DatabaseError(#[from] sqlx::Error),
+    Database(#[from] sqlx::Error),
 
     #[error("{0}")]
-    PasswordError(String),
-
-    #[error("JWT error")]
-    InvalidToken(#[from] jsonwebtoken::errors::Error),
+    PasswordHash(String),
 
     #[error("{0}")]
     InvalidAccountID(String),
+
+    #[error("{0}")]
+    AccessTokenKeypair(String),
+
+    #[error("{0}")]
+    AccessTokenInvalid(String),
+
+    #[error("Failed to verify access token signature")]
+    AccessTokenSignature,
 
     #[error("Authorization header missing")]
     AuthBearer,
@@ -45,13 +53,14 @@ impl Error {
         use Error::*;
 
         match self {
-            DatabaseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Database(_) => StatusCode::INTERNAL_SERVER_ERROR,
             InvalidEntity(_) | UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
             Conflict(_) => StatusCode::CONFLICT,
-            PasswordError(_) | InvalidToken(_) | AuthPasswordError => StatusCode::UNAUTHORIZED,
-            InvalidAccountID(_) => StatusCode::BAD_REQUEST,
-            AuthBearer => StatusCode::BAD_REQUEST,
+            PasswordHash(_) | AccessTokenSignature | AuthPasswordError => StatusCode::UNAUTHORIZED,
+            InvalidAccountID(_) | AuthBearer => StatusCode::BAD_REQUEST,
             InvalidAPIKey(_) => StatusCode::FORBIDDEN,
+            AccessTokenKeypair(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            AccessTokenInvalid(_) => StatusCode::BAD_REQUEST,
         }
     }
 }
@@ -87,11 +96,20 @@ impl IntoResponse for Error {
     }
 }
 
-pub fn conflict_error(err: sqlx::Error, constraint: &str, message: &str) -> Error {
-    match err {
-        sqlx::Error::Database(dbe) if dbe.constraint() == Some(constraint) => {
-            Error::Conflict(message.into())
+static UNIQUES: phf::Map<&'static str, &'static str> = phf_map! {
+    "accounts_subdomain_key" => "Subdomain is already in use",
+    "passwords_account_id_email_unique" => "Email is already in use",
+};
+
+pub fn conflict_error(err: sqlx::Error) -> Error {
+    match &err {
+        sqlx::Error::Database(dbe) => {
+            let constraint = dbe.constraint().unwrap_or_default();
+            if let Some(message) = UNIQUES.get(constraint) {
+                return Error::Conflict(message.to_string());
+            }
+            Error::Database(err)
         }
-        _ => Error::DatabaseError(err.into()),
+        _ => Error::Database(err),
     }
 }

@@ -1,0 +1,10 @@
+[typescript.type_mappings]
+# chrono
+"NaiveDateTime" = "Date"
+"DateTime" = "Date"
+
+# uuid
+"Uuid" = "string"
+
+# serde
+"Value" = "object"

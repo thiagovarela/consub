@@ -1,9 +1,16 @@
 use axum::extract::FromRef;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use sqlx::{postgres::PgPoolOptions, Executor, PgPool};
 
 pub async fn database_pool(db_url: &str) -> PgPool {
     PgPoolOptions::new()
         .max_connections(15)
+        .after_connect(|conn, _meta| {
+            Box::pin(async move {
+                conn.execute("SET application_name = 'consub'; SET search_path = 'public';")
+                    .await?;
+                Ok(())
+            })
+        })
         .connect(db_url)
         .await
         .expect("Can't connect to database")
@@ -19,7 +26,7 @@ pub mod testing {
 
     use tracing_subscriber::EnvFilter;
 
-    pub async fn test_app(routes: axum::Router) -> String {
+    pub async fn test_app(routes: aide::axum::ApiRouter) -> String {
         let listener = TcpListener::bind("127.0.0.1:0").expect("Unable to bind to address");
         let port = listener.local_addr().unwrap().port();
         let env_filter =
@@ -40,6 +47,6 @@ pub mod testing {
                 .expect("failed to start")
         });
 
-        format!("http://127.0.0.1:{}", port.to_string())
+        format!("http://127.0.0.1:{port}")
     }
 }

@@ -15,7 +15,6 @@ chrono = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }
 addr = { workspace = true }
-jsonwebtoken = { workspace = true }
 axum-auth = { workspace = true }
 reqwest = { workspace = true }
 tracing = { workspace = true }
@@ -24,8 +23,12 @@ validator = { workspace = true }
 serde_with = { workspace = true }
 once_cell = { workspace = true }
 regex = { workspace = true }
+phf = { workspace = true }
+schemars = { workspace = true }
+aide = { workspace = true }
 
 ed25519-dalek = "1.0.1"
+jwt-compact = { version = "0.6.0", features = ["ed25519-dalek"] }
 rand = "0.7.0"
 argon2 = "0.4.1"
 

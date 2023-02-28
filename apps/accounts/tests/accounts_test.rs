@@ -9,7 +9,7 @@ async fn test_create_a_valid_account(pool: sqlx::PgPool) {
     let client = reqwest::Client::new();
 
     let response = client
-        .post(format!("{}/", address))
+        .post(format!("{address}/"))
         .json(&serde_json::json!({
             "email": "fancy@website.com",
             "password": "consub123",
@@ -30,7 +30,7 @@ async fn test_fail_to_create_existing_subdomain(pool: sqlx::PgPool) {
     let client = reqwest::Client::new();
 
     let response = client
-        .post(format!("{}/", address))
+        .post(format!("{address}/"))
         .json(&serde_json::json!({
             "email": "fancy@website.com",
             "password": "consub123",
@@ -51,7 +51,7 @@ async fn test_can_retrieve_access_token(pool: sqlx::PgPool) {
     let client = reqwest::Client::new();
 
     let response = client
-        .post(format!("{}/users/access-tokens/passwords", address))
+        .post(format!("{address}/users/access-tokens/passwords"))
         .header("X-API-KEY", "e6af50e6-0ef3-4908-80c0-a83622d96d03")
         .json(&serde_json::json!({
             "email": "thiagovarela@consub.io",
@@ -71,7 +71,7 @@ async fn test_can_retrieve_access_token_with_subdomain(pool: sqlx::PgPool) {
     let client = reqwest::Client::new();
 
     let response = client
-        .post(format!("{}/users/access-tokens/passwords", address))
+        .post(format!("{address}/users/access-tokens/passwords"))
         .header("X-FORWARDED-HOST", "consub.example.com")
         .json(&serde_json::json!({
             "email": "thiagovarela@consub.io",
@@ -91,7 +91,7 @@ async fn test_login_with_wrong_password(pool: sqlx::PgPool) {
     let client = reqwest::Client::new();
 
     let response = client
-        .post(format!("{}/users/access-tokens/passwords", address))
+        .post(format!("{address}/users/access-tokens/passwords"))
         .header("X-FORWARDED-HOST", "consub.example.com")
         .json(&serde_json::json!({
             "email": "thiagovarela@consub.io",

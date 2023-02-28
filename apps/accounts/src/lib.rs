@@ -13,3 +13,4 @@ pub use router::routes;
 pub use extractors::{APIKey, AccountID};
 
 pub use authentication::authenticate_user_with_password;
+pub use authentication::authorization_layer;

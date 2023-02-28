@@ -6,6 +6,7 @@ CREATE TABLE accounts.accounts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
     subdomain VARCHAR(100) UNIQUE NOT NULL,    
+    feature_flags JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -16,8 +17,7 @@ SELECT setup_tgr_updated_at('accounts.accounts');
 CREATE TABLE accounts.account_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id UUID NOT NULL REFERENCES accounts.accounts (id),
-    public_key BYTEA NOT NULL,
-    secret_key BYTEA NOT NULL,
+    keypair BYTEA NOT NULL,    
     expires_at TIMESTAMP
 );
 CREATE INDEX account_keys_account_id_idx ON accounts.account_keys (account_id);
@@ -27,23 +27,22 @@ SELECT setup_tgr_updated_at('accounts.account_keys');
 CREATE TABLE accounts.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_id UUID NOT NULL REFERENCES accounts.accounts (id),
+    email VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX user_account_id_idx ON accounts.users (account_id);
+CREATE UNIQUE INDEX user_account_id_email_unique ON accounts.users (account_id, email);
 SELECT setup_tgr_updated_at('accounts.users');
 
+
 -- This table is used to allow email/password identity. 
--- The account id is denormalized to allow uniqueness of email per account.
 CREATE TABLE accounts.passwords (
-    user_id UUID NOT NULL REFERENCES accounts.users (id),
-    account_id UUID NOT NULL REFERENCES accounts.accounts (id),
-    email VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL REFERENCES accounts.users (id),    
     hash_password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, account_id)
+    PRIMARY KEY (user_id)
 );
 CREATE INDEX passwords_user_id_idx ON accounts.passwords (user_id);
-CREATE UNIQUE INDEX passwords_account_id_email_idx ON accounts.passwords (account_id, email);
 SELECT setup_tgr_updated_at('accounts.passwords');
