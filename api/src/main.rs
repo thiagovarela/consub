@@ -9,8 +9,6 @@ use shared::{database_pool, AppState};
 use sqlx::PgPool;
 use std::{net::SocketAddr, sync::Arc};
 
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
-
 use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
@@ -108,13 +106,12 @@ fn init_tracing() -> Result<(), axum::BoxError> {
     let subscriber = tracing_subscriber::registry();
 
     if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "info,sqlx=debug,tower_http=debug,aide=off")
+        std::env::set_var("RUST_LOG", "info,sqlx=debug,tower_http=info,aide=off")
     }
 
     let subscriber = subscriber.with(EnvFilter::from_default_env());
     let fmt_layer = tracing_subscriber::fmt::layer()
-        .json()                
-        .flatten_event(true);
+        .compact().with_ansi(false);
     let subscriber = subscriber.with(fmt_layer);
     tracing::subscriber::set_global_default(subscriber)?;
 

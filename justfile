@@ -1,5 +1,6 @@
 
 tag := env_var_or_default('tag', 'latest')
+api_name := env_var_or_default('api_name', 'api')
 
 database_url := "postgres://consub_rw:localpwd@localhost/consub"
 
@@ -24,18 +25,11 @@ release:
 reset:
     sqlx database reset --database-url {{database_url}}
 
-ts:
-    typeshare ./apps/accounts --lang=typescript --output-file=./admin/src/lib/api/types/accounts.ts
-    typeshare ./apps/blogs --lang=typescript --output-file=./admin/src/lib/api/types/blogs.ts
-    typeshare ./apps/clippings --lang=typescript --output-file=./admin/src/lib/api/types/clippings.ts
-
-prep: ts     
+prep: 
     cargo sqlx prepare --database-url {{database_url}} --merged
-
 
 test:
     cargo test --workspace
-    cd admin && pnpm test
 
 deploy:
-    fly launch --image registry.fly.io/consub-api:{{tag}} --force-machines  --region mad
+    fly launch --image registry.fly.io/{{api_name}}:{{tag}} --force-machines  --region mad

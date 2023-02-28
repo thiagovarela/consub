@@ -11,4 +11,3 @@ vite.config.ts.timestamp-*
 target/
 .vscode
 fly.toml
-justfile
