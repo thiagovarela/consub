@@ -7,5 +7,6 @@ export type ClippingItemQuery = {
 	is_featured?: boolean | null;
 	locale?: string | null;
 	published_at?: string | null;
+	slug?: string | null;
 	tag?: Array<string>;
 };

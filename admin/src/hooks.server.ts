@@ -1,4 +1,5 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
+
 import { getHeaderLanguage } from '$lib/locales';
 
 import { logger } from '$lib/logger';
@@ -23,11 +24,27 @@ export const handle = (async ({ event, resolve }) => {
 	}
 	event.locals.subdomain = event.params.subdomain;
 	event.locals.headerLanguage = getHeaderLanguage(event.request.headers.get('accept-language'));
+
 	const response = await resolve(event);
 
-	logger.info(
-		`Request ${event.request.method} ${event.request.url} took ${Date.now() - requestStart}ms`
-	);
+	if (response.ok) {
+		logger.info(
+			`Request ${event.request.method} ${event.request.url} took ${
+				Date.now() - requestStart
+			}ms`
+		);
+	}
 
 	return response;
 }) satisfies Handle;
+
+export const handleError = (({ error, event }) => {
+	logger.error(
+		`Request ${event.request.method} ${event.request.url} failed with ${error?.code ?? ''} ${
+			error?.message ?? ''
+		}`
+	);
+	return {
+		message: 'Internal Error'
+	};
+}) satisfies HandleServerError;

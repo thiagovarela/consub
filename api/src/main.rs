@@ -104,14 +104,13 @@ fn init_tracing() -> Result<(), axum::BoxError> {
     use tracing_subscriber::filter::EnvFilter;
 
     let subscriber = tracing_subscriber::registry();
-
-    if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "info,sqlx=debug,tower_http=info,aide=off")
-    }
-
     let subscriber = subscriber.with(EnvFilter::from_default_env());
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .compact().with_ansi(false);
+
+    #[cfg(not(debug_assertions))]
+    let fmt_layer = tracing_subscriber::fmt::layer().json().flatten_event(true);
+    #[cfg(debug_assertions)]
+    let fmt_layer = tracing_subscriber::fmt::layer();
+
     let subscriber = subscriber.with(fmt_layer);
     tracing::subscriber::set_global_default(subscriber)?;
 

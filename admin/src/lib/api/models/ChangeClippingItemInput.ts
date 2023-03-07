@@ -3,7 +3,9 @@
 /* eslint-disable */
 
 export type ChangeClippingItemInput = {
-	body?: any;
+	body_html?: string | null;
+	body_json?: any;
+	body_text?: string | null;
 	category_id?: string | null;
 	is_featured?: boolean | null;
 	locale?: string | null;

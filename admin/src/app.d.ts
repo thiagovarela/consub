@@ -21,3 +21,5 @@ declare global {
 }
 
 export {};
+
+declare module 'svelecte';

@@ -4,10 +4,9 @@ use aide::{
     axum::{routing::get_with, ApiRouter, IntoApiResponse},
     transform::TransformOperation,
 };
+use axum::extract::State;
 use axum::extract::{Path, Query};
 use axum::http::StatusCode;
-
-use axum::extract::State;
 use axum::{debug_handler, middleware, Json};
 use axum_extra::extract::Query as ExtraQuery;
 use schemars::JsonSchema;
@@ -55,6 +54,7 @@ pub async fn list_categories(
 ) -> Result<impl IntoApiResponse, Error> {
     let mut conn = pool.acquire().await?;
     let categories = crate::categories::list_categories(&mut conn, user.account_id, query).await?;
+
     Ok((StatusCode::OK, Json(categories)))
 }
 
@@ -214,7 +214,7 @@ pub mod public {
 
     #[debug_handler]
     pub async fn list_categories(
-        State(pool): State<PgPool>, account: Account, Query(query): Query<CategoryQuery>,
+        State(pool): State<PgPool>, account: Account, ExtraQuery(query): ExtraQuery<CategoryQuery>,
     ) -> Result<impl IntoApiResponse, Error> {
         let mut conn = pool.acquire().await?;
         let categories = crate::categories::list_categories(&mut conn, account.id, query).await?;
@@ -261,7 +261,6 @@ pub mod public {
             .tag("public_clippings")
     }
 }
-
 
 pub fn routes(app_state: AppState) -> ApiRouter {
     let admin = ApiRouter::new()

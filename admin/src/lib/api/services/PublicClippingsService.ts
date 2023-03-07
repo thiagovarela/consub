@@ -63,12 +63,14 @@ export class PublicClippingsService {
 		isFeatured,
 		locale,
 		publishedAt,
+		slug,
 		tag
 	}: {
 		categoryId?: Array<string>;
 		isFeatured?: boolean | null;
 		locale?: string | null;
 		publishedAt?: string | null;
+		slug?: string | null;
 		tag?: Array<string>;
 	}): CancelablePromise<Array<ClippingItem>> {
 		return __request(OpenAPI, {
@@ -79,6 +81,7 @@ export class PublicClippingsService {
 				is_featured: isFeatured,
 				locale: locale,
 				published_at: publishedAt,
+				slug: slug,
 				tag: tag
 			}
 		});

@@ -9,7 +9,7 @@ import {
 } from '$lib/api';
 import dayjs from 'dayjs';
 
-export const load = (async ({ locals, params, request }: RequestEvent) => {
+export async function load ({ locals, params, request }: RequestEvent) {
 	let categories = await ClippingsService.listCategories({});
 	let languages = parse(request.headers.get('accept-language')).map(
 		(l: { code: any; region: any }) => `${l.code}-${l.region}`
@@ -34,7 +34,9 @@ export const actions = {
 	create: async ({ request }: RequestEvent) => {
 		const values = await request.formData();
 		const title = values.get('title')?.toString();
-		const body = values.get('body')?.toString();
+		let body_json = values.get('body_json')?.toString();
+		const body_html = values.get('body_html')?.toString();
+		const body_text = values.get('body_text')?.toString();
 		const locale = values.get('locale')?.toString();
 		const source = values.get('source')?.toString();
 		const source_url = values.get('source_url')?.toString();
@@ -42,13 +44,25 @@ export const actions = {
 		const is_featured = values.get('source_url')?.toString();
 		const category_id = values.get('category_id')?.toString();
 
-		if (!title || !body || !source || !source_url || !source_published_at || !locale) {
+		if (
+			!title ||
+			!body_json ||
+			!body_html ||
+			!body_text ||
+			!source ||
+			!source_url ||
+			!source_published_at ||
+			!locale
+		) {
 			return fail(400, { message: 'Required fields are missing!' });
 		}
+		body_json = JSON.parse(body_json);
 
 		let input = {
 			title,
-			body: JSON.parse(body),
+			body_json,
+			body_html,
+			body_text,
 			locale,
 			source,
 			source_url,
@@ -67,8 +81,11 @@ export const actions = {
 
 	update: async ({ request, params }: RequestEvent) => {
 		const values = await request.formData();
+
 		const title = values.get('title')?.toString();
-		const body = values.get('body')?.toString();
+		let body_json = values.get('body_json')?.toString();
+		const body_html = values.get('body_html')?.toString();
+		const body_text = values.get('body_text')?.toString();
 		const source = values.get('source')?.toString();
 		const source_url = values.get('source_url')?.toString();
 		let source_published_at = values.get('source_published_at')?.toString();
@@ -82,16 +99,25 @@ export const actions = {
 		source_published_at = source_published_at
 			? dayjs(source_published_at).format('YYYY-MM-DDTHH:mm:ss')
 			: undefined;
+		console.log(body_json);
+
+		body_json = body_json ? JSON.parse(body_json) : undefined;
+
+		console.log(body_json);
 
 		let input = {
 			title,
-			body: body ? JSON.parse(body) : undefined,
+			body_json,
+			body_html,
+			body_text,
 			source,
 			source_url,
 			source_published_at,
 			is_featured: is_featured ? true : false,
 			category_id
 		} satisfies ChangeClippingItemInput;
+
+		console.log(input);
 
 		let item = await ClippingsService.changeItem({
 			itemId: params.item_id,

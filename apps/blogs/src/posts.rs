@@ -7,10 +7,8 @@ use validator::Validate;
 use crate::error::{conflict_error, Error};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[typeshare::typeshare]
 pub struct Post {
     pub id: Uuid,
-    #[typeshare(skip)]
     pub account_id: Uuid,
     pub author_id: Uuid,
     pub title: String,
@@ -30,13 +28,10 @@ pub struct Post {
     pub og_title: Option<String>,
     pub og_description: Option<String>,
     pub og_image: Option<String>,
-
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
 #[derive(Debug, serde::Deserialize, Validate)]
-#[typeshare::typeshare]
 pub struct CreatePostInput {
     pub title: String,
     pub body: serde_json::Value,
@@ -58,7 +53,6 @@ pub struct CreatePostInput {
 }
 
 #[derive(Debug, serde::Deserialize, Validate)]
-#[typeshare::typeshare]
 pub struct ChangePostInput {
     pub title: Option<String>,
     pub slug: Option<String>,
@@ -81,7 +75,6 @@ pub struct ChangePostInput {
 }
 
 #[derive(Debug, serde::Deserialize, Validate)]
-#[typeshare::typeshare]
 pub struct PostQuery {
     pub locale: Option<String>,
     #[serde(default, rename = "category_id")]
@@ -110,7 +103,7 @@ pub async fn create_post(
         short_description, featured_image, featured_image_alt, featured_image_caption,
         category_id, reading_time_minutes,
         translation_of, published_at,
-        keywords, og_title, og_description, og_image, created_at, updated_at
+        keywords, og_title, og_description, og_image, updated_at
         "#,
         account_id,
         author_id,
@@ -199,7 +192,7 @@ pub async fn list_posts(
         short_description, featured_image, featured_image_alt, featured_image_caption,
         category_id, reading_time_minutes,
         translation_of, published_at,
-        keywords, og_title, og_description, og_image, created_at, updated_at FROM blogs.posts
+        keywords, og_title, og_description, og_image, updated_at FROM blogs.posts
         WHERE account_id = $1 
         AND ($2::text IS NULL OR locale = $2)
         AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))
@@ -220,7 +213,7 @@ pub async fn get_post(conn: &mut PgConnection, account_id: Uuid, id: Uuid) -> Re
         short_description, featured_image, featured_image_alt, featured_image_caption,
         category_id, reading_time_minutes,
         translation_of, published_at,
-        keywords, og_title, og_description, og_image, created_at, updated_at
+        keywords, og_title, og_description, og_image, updated_at
         FROM blogs.posts
         WHERE account_id = $1 AND id = $2
         "#,

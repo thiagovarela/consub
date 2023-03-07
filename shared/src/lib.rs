@@ -1,6 +1,8 @@
 use axum::extract::FromRef;
 use sqlx::{postgres::PgPoolOptions, Executor, PgPool};
 
+pub mod pagination;
+
 pub async fn database_pool(db_url: &str) -> PgPool {
     PgPoolOptions::new()
         .max_connections(15)

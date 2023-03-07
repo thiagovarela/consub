@@ -11,28 +11,33 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	let tiptap: Tiptap;
-	let content: string = JSON.stringify(data?.item?.body);
-	let title: string = data?.item?.title ?? 'Title...';
+	let tiptap: Tiptap;	
 	// input date fields don't support timezones, so we need to strip the timezone
 	let source_published_at =
 		form?.item?.source_published_at.toString().split('T')[0] ??
 		data?.item?.source_published_at?.toString().split('T')[0] ??
 		'';
-	let initialContent = data?.item?.body ?? {
+	let initialContent = {
 		type: 'doc',
 		content: [
 			{
-				type: 'heading',
+				type: 'paragraph',
 				content: [
 					{
 						type: 'text',
-						text: 'Title...'
+						text: 'Start typing...'
 					}
 				]
 			}
 		]
 	};
+	if (data?.item?.body_json) {
+		initialContent = data.item.body_json;
+	}
+
+	let bodyJson: string = JSON.stringify(initialContent);
+	let bodyText: string = data?.item?.body_text ?? '';
+	let bodyHtml: string = data?.item?.body_html ?? '';
 
 	let localeData: SelectOption[] = locales(data.languages);
 	let selectedLocale: SelectOption | undefined;
@@ -77,8 +82,9 @@
 				update({ reset: false });
 			};
 		}}>
-		<input type="hidden" name="body" bind:value={content} />
-		<input type="hidden" name="title" bind:value={title} />
+		<input type="hidden" name="body_json" bind:value={bodyJson} />
+		<input type="hidden" name="body_html" bind:value={bodyHtml} />
+		<input type="hidden" name="body_text" bind:value={bodyText} />
 
 		<div class="flex flex-1">
 			<div class="flex-1 border-r border-gray-200 overflow-y-auto">
@@ -86,13 +92,9 @@
 					aria-labelledby="primary-heading"
 					class="flex h-full flex-1 flex-col place-items-center">
 					<Tiptap
-						getContent={(jsonContent) => {
-							let first = jsonContent.content.at(0);
-							if (first.type === 'heading') {
-								title = first?.content?.at(0)?.text;
-							}
-							content = JSON.stringify(jsonContent);
-						}}
+						bind:contentJsonString={bodyJson}
+						bind:contentHtml={bodyHtml}
+						bind:contentText={bodyText}
 						{initialContent}
 						bind:this={tiptap} />
 				</div>
@@ -144,6 +146,22 @@
 						<div class="flex flex-1 flex-col justify-between">
 							<div class="px-4 sm:px-6">
 								<div class="space-y-6 pt-6 pb-5">
+									<div>
+										<label
+											for="title"
+											class="block text-sm font-medium text-gray-900">
+											Title
+										</label>
+										<div class="mt-1">
+											<input
+												type="text"
+												required
+												name="title"
+												value={form?.item?.title ?? data?.item?.title ?? ''}
+												id="title"
+												class="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm" />
+										</div>
+									</div>
 									<div>
 										<label
 											for="source"

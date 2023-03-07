@@ -22,6 +22,7 @@ phf = { workspace = true }
 schemars = { workspace = true }
 aide = { workspace = true }
 slug = "0.1"
+rusty_ulid = {version = "2.0.0", features = ["serde", "schemars"]}
 
 shared = { path = "../../shared" }
 accounts = { path = "../accounts" }

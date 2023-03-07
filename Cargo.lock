@@ -152,7 +152,6 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
- "typeshare",
 ]
 
 [[package]]
@@ -407,7 +406,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
- "typeshare",
  "uuid",
  "validator",
 ]
@@ -490,6 +488,7 @@ dependencies = [
  "chrono",
  "phf",
  "reqwest",
+ "rusty_ulid",
  "schemars",
  "serde",
  "serde_json",
@@ -2164,6 +2163,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5583e89e108996506031660fe09baa5011b9dd0341b89029313006d1fb508d70"
 
 [[package]]
+name = "rusty_ulid"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e0719c0520bdfc6f5a02c8bd8b20f9fc8785de57d4e117e144ade9c5f152626"
+dependencies = [
+ "rand 0.8.5",
+ "schemars",
+ "serde",
+ "time 0.3.17",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2427,7 +2438,9 @@ version = "0.1.0"
 dependencies = [
  "aide",
  "axum",
+ "schemars",
  "serde",
+ "serde_with",
  "sqlx",
  "tokio",
  "tracing",
@@ -3059,28 +3072,6 @@ name = "typenum"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
-
-[[package]]
-name = "typeshare"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7f096d7253207ace684191e2c22d6480345975c15bbccd7c14d5de713f08bd6"
-dependencies = [
- "chrono",
- "serde",
- "serde_json",
- "typeshare-annotation",
-]
-
-[[package]]
-name = "typeshare-annotation"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "389b0235d70d7c762268e3b693e5efbe0879b036de868a39188309e2ced169ec"
-dependencies = [
- "quote",
- "syn",
-]
 
 [[package]]
 name = "unicode-bidi"

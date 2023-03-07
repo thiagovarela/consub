@@ -11,7 +11,9 @@
 	let editor: Editor;
 
 	export let initialContent: object = {};
-	export let getContent: any;
+	export let contentJsonString: string;
+	export let contentHtml: string;
+	export let contentText: string;
 
 	onMount(() => {
 		editor = new Editor({
@@ -35,7 +37,9 @@
 			}
 		});
 		editor.on('update', () => {
-			getContent(editor.getJSON());
+			contentJsonString = JSON.stringify(editor.getJSON());
+			contentHtml = editor.getHTML();
+			contentText = editor.getText();
 		});
 	});
 

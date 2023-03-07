@@ -1,12 +1,12 @@
 use chrono::NaiveDateTime;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use serde_with::serde_as;
 use sqlx::PgConnection;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::error::{conflict_error, Error};
+use shared::pagination::CursorPagination;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ClippingItem {
@@ -16,7 +16,9 @@ pub struct ClippingItem {
     pub created_by_id: Uuid,
     pub title: String,
     pub slug: String,
-    pub body: serde_json::Value,
+    pub body_json: serde_json::Value,
+    pub body_html: String,
+    pub body_text: String,
     pub source: String,
     pub source_url: String,
     pub source_published_at: NaiveDateTime,
@@ -27,14 +29,15 @@ pub struct ClippingItem {
     pub tags: Vec<String>,
     pub reading_time_minutes: Option<i32>,
     pub published_at: Option<NaiveDateTime>,
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
 #[derive(Debug, serde::Deserialize, Validate, JsonSchema)]
 pub struct CreateClippingItemInput {
     pub title: String,
-    pub body: serde_json::Value,
+    pub body_json: serde_json::Value,
+    pub body_html: String,
+    pub body_text: String,
     pub locale: String,
     pub source: String,
     pub source_url: String,
@@ -52,7 +55,9 @@ pub struct CreateClippingItemInput {
 pub struct ChangeClippingItemInput {
     pub title: Option<String>,
     pub slug: Option<String>,
-    pub body: Option<serde_json::Value>,
+    pub body_json: Option<serde_json::Value>,
+    pub body_html: Option<String>,
+    pub body_text: Option<String>,
     pub locale: Option<String>,
     pub source: Option<String>,
     pub source_url: Option<String>,
@@ -62,9 +67,9 @@ pub struct ChangeClippingItemInput {
     pub category_id: Option<Uuid>,
     pub reading_time_minutes: Option<i32>,
     #[serde(
-        default,                                                    
+        default,
         skip_serializing_if = "Option::is_none",
-        deserialize_with = "::serde_with::rust::double_option::deserialize",
+        deserialize_with = "::serde_with::rust::double_option::deserialize"
     )]
     pub published_at: Option<Option<NaiveDateTime>>,
     #[serde(default)]
@@ -80,6 +85,10 @@ pub struct ClippingItemQuery {
     pub tags: Vec<Uuid>,
     pub is_featured: Option<bool>,
     pub published_at: Option<NaiveDateTime>,
+    pub slug: Option<String>,
+
+    #[serde(default, flatten)]
+    pub pagination: CursorPagination,
 }
 
 pub async fn create_clipping_item(
@@ -89,20 +98,22 @@ pub async fn create_clipping_item(
         ClippingItem,
         r#"
         INSERT INTO clippings.items (
-            account_id, created_by_id, title, slug, body, locale,
+            account_id, created_by_id, title, slug, body_json, body_html, body_text, locale,
             short_description, source, source_url, source_published_at, is_featured,            
             category_id, reading_time_minutes, published_at, tags          
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-        RETURNING id, account_id, created_by_id, title, slug, body, locale,
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        RETURNING id, account_id, created_by_id, title, slug, body_json, body_html, body_text, locale,
         short_description, source, source_url, source_published_at, is_featured,            
-        category_id, reading_time_minutes, published_at, tags, created_at, updated_at
+        category_id, reading_time_minutes, published_at, tags, updated_at
         "#,
         account_id,
         user_id,
         &input.title,
         slug::slugify(&input.title),
-        input.body,
+        input.body_json,
+        input.body_html,
+        input.body_text,
         input.locale,
         input.short_description,
         input.source,
@@ -123,7 +134,7 @@ pub async fn change_clipping_item(
     input: ChangeClippingItemInput,
 ) -> Result<ClippingItem, Error> {
     let item = get_clipping_item(conn, account_id, clipping_item_id).await?;
-    print!("{:?}", input);
+
     sqlx::query_as!(
         ClippingItem,
         r#"
@@ -131,7 +142,7 @@ pub async fn change_clipping_item(
         SET title = COALESCE($3, title),
             slug = COALESCE($4, slug),
             locale = COALESCE($5, locale),
-            body = COALESCE($6, body),
+            body_json = COALESCE($6, body_json),
             is_featured = COALESCE($7, is_featured),
             short_description = COALESCE($8, short_description),
             source = COALESCE($9, source),
@@ -140,7 +151,9 @@ pub async fn change_clipping_item(
             category_id = COALESCE($12, category_id),
             reading_time_minutes = COALESCE($13, reading_time_minutes),                        
             published_at = $14,
-            tags = COALESCE($15, tags)
+            tags = COALESCE($15, tags),
+            body_html = COALESCE($16, body_html),
+            body_text = COALESCE($17, body_text)
         WHERE id = $1
           AND account_id = $2
         RETURNING *
@@ -150,7 +163,7 @@ pub async fn change_clipping_item(
         input.title,
         input.slug.map_or(None, |s| Some(slug::slugify(&s))),
         input.locale,
-        input.body,
+        input.body_json,
         input.is_featured,
         input.short_description,
         input.source,
@@ -160,6 +173,8 @@ pub async fn change_clipping_item(
         input.reading_time_minutes,
         input.published_at.unwrap_or_else(|| item.published_at),
         &input.tags,
+        input.body_html,
+        input.body_text
     )
     .fetch_one(conn)
     .await
@@ -175,11 +190,15 @@ pub async fn list_clipping_items(
         FROM clippings.items
         WHERE account_id = $1 
         AND ($2::text IS NULL OR locale = $2)
-        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))        
+        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))  
+        AND ($4::text IS NULL OR id < $4::uuid)
+        ORDER BY id LIMIT $5
         "#,
         account_id,
         query.locale,
         &query.category_ids,
+        query.pagination.after,
+        query.pagination.take
     )
     .fetch_all(conn)
     .await?)
@@ -211,10 +230,16 @@ pub async fn public_list_clipping_items(
         WHERE account_id = $1 AND published_at IS NOT NULL
         AND ($2::text IS NULL OR locale = $2)
         AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))        
+        AND ($4::text IS NULL OR slug = $4)
+        AND ($5::text IS NULL OR id < $5::uuid)
+        ORDER BY published_at, id LIMIT $6
         "#,
         account_id,
         query.locale,
         &query.category_ids,
+        query.slug,
+        query.pagination.after,
+        query.pagination.take
     )
     .fetch_all(conn)
     .await?)

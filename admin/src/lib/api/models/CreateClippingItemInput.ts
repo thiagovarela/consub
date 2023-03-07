@@ -3,7 +3,9 @@
 /* eslint-disable */
 
 export type CreateClippingItemInput = {
-	body: any;
+	body_html: string;
+	body_json: any;
+	body_text: string;
 	category_id?: string | null;
 	is_featured?: boolean | null;
 	locale: string;

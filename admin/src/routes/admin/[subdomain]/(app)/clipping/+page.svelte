@@ -31,6 +31,11 @@
 						class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
 						Language
 					</th>
+					<th
+						scope="col"
+						class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+						Category
+					</th>
 				</tr>
 			</thead>
 			<tbody class="bg-white">
@@ -49,6 +54,9 @@
 						</td>
 						<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
 							{localeNames.of(item.locale)}
+						</td>
+						<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+							{data.categories.find(c => c.id === item.category_id)?.name ?? 'Uncategorized'}
 						</td>
 					</tr>
 				{/each}

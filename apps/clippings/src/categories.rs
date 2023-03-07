@@ -4,18 +4,19 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use uuid::Uuid;
 
+use shared::pagination::CursorPagination;
+
 use crate::error::{conflict_error, Error};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-
 pub struct Category {
+    #[schemars(with = "String")]
     pub id: Uuid,
     #[serde(skip)]
     pub account_id: Uuid,
     pub name: String,
     pub slug: String,
     pub locale: String,
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
@@ -32,12 +33,15 @@ pub struct ChangeCategoryInput {
     pub slug: Option<String>,
 }
 
-#[derive(Debug, serde::Deserialize, JsonSchema)]
+#[derive(Debug, JsonSchema, Deserialize)]
 pub struct CategoryQuery {
     #[serde(rename = "name_starts_with")]
     pub name: Option<String>,
     pub locale: Option<String>,
     pub translation_of: Option<Uuid>,
+
+    #[serde(default, flatten)]
+    pub pagination: CursorPagination,
 }
 
 pub async fn create_category(
@@ -129,11 +133,15 @@ pub async fn list_categories(
         SELECT * FROM clippings.categories
         WHERE account_id = $1
         AND ($2::text IS NULL OR name ~* $2)
-        AND ($3::text IS NULL OR locale = $3)
+        AND ($3::text IS NULL OR locale = $3)        
+        AND ($5::text IS NULL OR id > $5::uuid)
+        ORDER BY id LIMIT $4
         "#,
         account_id,
         query.name,
-        query.locale
+        query.locale,
+        query.pagination.take,
+        query.pagination.after
     )
     .fetch_all(conn)
     .await?)

@@ -21,10 +21,9 @@ use crate::{
 pub struct Account {
     pub id: Uuid,
     pub name: String,
-    pub subdomain: String,    
+    pub subdomain: String,
     #[schemars(with = "AccountFeatureFlags")]
     pub feature_flags: sqlx::types::Json<AccountFeatureFlags>,
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
@@ -65,7 +64,7 @@ pub async fn create_account(
         VALUES ($1, $2)
         RETURNING id, name, subdomain, 
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
-        created_at, updated_at
+        updated_at
         "#,
         input.name,
         input.subdomain
@@ -139,7 +138,7 @@ pub async fn get_account_by_subdomain(
         r#"
         SELECT id, name, subdomain, 
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
-        created_at, updated_at
+        updated_at
         FROM accounts.accounts
         WHERE subdomain = $1
         "#,
@@ -157,7 +156,7 @@ pub async fn get_account_by_x_api_key(
         r#"
         SELECT id, name, subdomain,
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
-        created_at, updated_at
+        updated_at
         FROM accounts.accounts
         WHERE id = (
             SELECT account_id

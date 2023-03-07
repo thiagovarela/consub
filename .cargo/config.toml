@@ -1,5 +1,5 @@
 [env]
 SQLX_OFFLINE="false"
 DATABASE_URL="postgres://consub_rw:localpwd@localhost/consub"
-RUST_LOG="info,sqlx=debug,tower_http=debug,aide=off"
+RUST_LOG="info"
 SIGN_CONTEXT="consub"

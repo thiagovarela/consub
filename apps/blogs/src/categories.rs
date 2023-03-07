@@ -6,21 +6,17 @@ use uuid::Uuid;
 use crate::error::{conflict_error, Error};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[typeshare::typeshare]
 pub struct Category {
     pub id: Uuid,
-    #[typeshare(skip)]
     pub account_id: Uuid,
     pub name: String,
     pub slug: String,
     pub locale: String,
     pub translation_of: Option<Uuid>,
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
 #[derive(Debug, Deserialize)]
-#[typeshare::typeshare]
 pub struct CreateCategoryInput {
     pub name: String,
     pub locale: String,
@@ -49,7 +45,6 @@ pub async fn create_category(
 }
 
 #[derive(Debug, Deserialize)]
-#[typeshare::typeshare]
 pub struct ChangeCategoryInput {
     pub name: Option<String>,
     pub locale: Option<String>,
@@ -120,7 +115,6 @@ pub async fn get_category_by_id(
 }
 
 #[derive(Debug, serde::Deserialize)]
-#[typeshare::typeshare]
 pub struct CategoryQuery {
     pub name: Option<String>,
     pub locale: Option<String>,

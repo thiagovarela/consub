@@ -100,21 +100,6 @@ pub async fn delete_category(
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[typeshare::typeshare]
-#[derive(serde::Serialize)]
-#[allow(dead_code)]
-/// The endpoints for the blogs service.
-enum AdminEndpoint {
-    #[serde(rename = "/blogs/admin/categories")]
-    Categories,
-    #[serde(rename = "/blogs/admin/categories/{category_id}")]
-    Category,
-    #[serde(rename = "/blogs/admin/posts")]
-    Posts,
-    #[serde(rename = "/blogs/admin/posts/{post_id}")]
-    Post,
-}
-
 pub fn routes(app_state: AppState) -> aide::axum::ApiRouter {
     let admin = aide::axum::ApiRouter::new()
         .route("/categories", post(create_category))

@@ -11,7 +11,6 @@ axum = { workspace = true }
 sqlx = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-typeshare = { workspace = true }
 aide = { workspace = true }
 tower-http = { version = "0.3", features = ["trace", "limit", "compression-full", "metrics", "sensitive-headers", "timeout", "validate-request", "cors"] }
 tracing-opentelemetry = "0.18.0"

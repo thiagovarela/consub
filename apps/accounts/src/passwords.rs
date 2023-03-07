@@ -5,6 +5,7 @@ use argon2::{
 
 use crate::error::Error;
 
+/// TODO: Make this run in a tokio thread/async
 pub fn hash_password(raw: String) -> Result<String, Error> {
     let salt = SaltString::generate(&mut OsRng);
 
@@ -19,6 +20,7 @@ pub fn hash_password(raw: String) -> Result<String, Error> {
     Ok(password_hash)
 }
 
+/// TODO: Make this run in a tokio thread/async
 pub fn verify_password(raw: String, hash: String) -> Result<(), Error> {
     let argon2 = Argon2::default();
 

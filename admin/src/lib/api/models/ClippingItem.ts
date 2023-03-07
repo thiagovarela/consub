@@ -3,7 +3,9 @@
 /* eslint-disable */
 
 export type ClippingItem = {
-	body: any;
+	body_html: string;
+	body_json: any;
+	body_text: string;
 	category_id?: string | null;
 	created_at: string;
 	created_by_id: string;

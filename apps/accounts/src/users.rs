@@ -15,7 +15,6 @@ pub struct User {
     #[serde(skip)]
     pub account_id: Uuid,
     pub email: String,
-    pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
 
@@ -33,7 +32,7 @@ pub async fn create_user_with_password(
         r#"
         INSERT INTO accounts.users (account_id, email)
         VALUES ($1, $2)
-        RETURNING id, account_id, email, created_at, updated_at
+        RETURNING id, account_id, email, updated_at
         "#,
         input.account_id,
         input.email.to_lowercase(),
@@ -61,7 +60,7 @@ pub async fn get_user_by_id(conn: &sqlx::PgPool, id: Uuid) -> Result<User, Error
     Ok(sqlx::query_as!(
         User,
         r#"
-        SELECT id, account_id, email, created_at, updated_at
+        SELECT id, account_id, email, updated_at
         FROM accounts.users
         WHERE id = $1
         "#,
