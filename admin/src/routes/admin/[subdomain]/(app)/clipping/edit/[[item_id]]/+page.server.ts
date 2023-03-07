@@ -9,7 +9,7 @@ import {
 } from '$lib/api';
 import dayjs from 'dayjs';
 
-export async function load ({ locals, params, request }: RequestEvent) {
+export const load = (async ({ locals, params, request }: RequestEvent) => {
 	let categories = await ClippingsService.listCategories({});
 	let languages = parse(request.headers.get('accept-language')).map(
 		(l: { code: any; region: any }) => `${l.code}-${l.region}`

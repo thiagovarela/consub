@@ -7,7 +7,6 @@ export type ClippingItem = {
 	body_json: any;
 	body_text: string;
 	category_id?: string | null;
-	created_at: string;
 	created_by_id: string;
 	id: string;
 	is_featured: boolean;

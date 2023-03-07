@@ -11,7 +11,7 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	let tiptap: Tiptap;	
+	let tiptap: Tiptap;
 	// input date fields don't support timezones, so we need to strip the timezone
 	let source_published_at =
 		form?.item?.source_published_at.toString().split('T')[0] ??

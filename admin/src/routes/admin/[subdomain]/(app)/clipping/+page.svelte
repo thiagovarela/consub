@@ -56,7 +56,8 @@
 							{localeNames.of(item.locale)}
 						</td>
 						<td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-							{data.categories.find(c => c.id === item.category_id)?.name ?? 'Uncategorized'}
+							{data.categories.find((c) => c.id === item.category_id)?.name ??
+								'Uncategorized'}
 						</td>
 					</tr>
 				{/each}
