@@ -5,10 +5,10 @@
 
 <style lang="postcss">
 	.bg-enabled {
-		@apply bg-emerald-600;
+		@apply bg-slate-600;
 	}
 	.bg-disabled {
-		@apply bg-gray-200;
+		@apply bg-slate-200;
 	}
 	.translate-enabled {
 		@apply translate-x-5;

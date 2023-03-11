@@ -53,13 +53,16 @@
 <style lang="postcss">
 	.editor-toolbar button {
 		@apply inline-flex items-center rounded border border-transparent px-2.5 py-1.5 text-xs
-         font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2;
+         font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
 	}
 	.editor-toolbar svg {
 		@apply w-4 h-4;
 	}
 	:global(.ProseMirror a) {
-		@apply text-emerald-500 hover:text-emerald-700;
+		@apply text-slate-500 hover:text-slate-700;
+	}
+	.editor-container {
+		@apply bg-white w-full;
 	}
 </style>
 
@@ -229,7 +232,7 @@
 	</div>
 {/if}
 
-<div bind:this={element} />
+<div class="editor-container" bind:this={element} />
 
 {#if editor}
 	<div>

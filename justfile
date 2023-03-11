@@ -5,7 +5,7 @@ api_name := env_var_or_default('api_name', 'api')
 database_url := "postgres://consub_rw:localpwd@localhost/consub"
 
 db: 
-    docker compose up -d postgres
+    docker compose up -d timescale --remove-orphans
 
 run: db    
    cargo run -p api

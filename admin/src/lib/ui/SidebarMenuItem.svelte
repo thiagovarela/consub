@@ -18,7 +18,7 @@
 		on:click={() => {
 			open = !open;
 		}}
-		class="bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 group w-full flex items-center pl-2 pr-1 py-2 text-left text-sm font-medium rounded-md focus:outline-none"
+		class="bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 group w-full flex items-center pl-2 pr-1 py-2 text-left text-sm font-medium focus:outline-none"
 		aria-controls="side-menu"
 		aria-expanded="false">
 		<slot name="svg-icon" class="w-5 flex-shrink-0 text-gray-300" />

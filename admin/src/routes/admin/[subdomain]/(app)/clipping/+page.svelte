@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 	import ListPage from '$lib/ui/ListPage.svelte';
+	import BasePage from '$lib/ui/BasePage.svelte';
 
 	export let data: PageData;
 
@@ -11,8 +12,23 @@
 	let localeNames = new Intl.DisplayNames(['en'], { type: 'language' });
 </script>
 
-<ListPage name="clipping" namePlural="clippings" editUrl="{url}/edit">
-	<span slot="table">
+<BasePage>
+	<span slot="header-left">
+		<h1 class="text-xl font-semibold text-gray-900">Clippings</h1>
+	</span>
+	<span slot="header-actions">
+		<a
+			href="{url}/categories"
+			class="border border-gray-300 bg-white py-2 px-4 text-sm font-light text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none">
+			Manage Categories
+		</a>
+		<a
+			href="{url}/edit"
+			class="ml-4 border border-gray-300 bg-white py-2 px-4 text-sm font-light text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none">
+			Create
+		</a>
+	</span>
+	<span slot="main">
 		<table class="min-w-full divide-y divide-gray-300">
 			<thead class="bg-gray-50">
 				<tr>
@@ -44,7 +60,7 @@
 						<td
 							class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
 							<a
-								class="text-emerald-600 hover:text-emerald-900"
+								class="text-slate-600 hover:text-slate-900"
 								href="clipping/edit/{item.id}">
 								{item.title}
 							</a>
@@ -64,4 +80,4 @@
 			</tbody>
 		</table>
 	</span>
-</ListPage>
+</BasePage>

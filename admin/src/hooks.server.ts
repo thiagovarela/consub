@@ -39,12 +39,14 @@ export const handle = (async ({ event, resolve }) => {
 }) satisfies Handle;
 
 export const handleError = (({ error, event }) => {
-	logger.error(
-		`Request ${event.request.method} ${event.request.url} failed with ${error?.code ?? ''} ${
-			error?.message ?? ''
-		}`
-	);
+	console.log(error);
+	// logger.error(
+	// 	`Request ${event.request.method} ${event.request.url} failed with ${error?.code ?? ''} ${
+	// 		error?.message ?? ''
+	// 	}`
+	// );
 	return {
-		message: 'Internal Error'
+		status: error.code ?? 500,
+		message: error.message
 	};
 }) satisfies HandleServerError;

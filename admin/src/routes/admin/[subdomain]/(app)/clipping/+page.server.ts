@@ -12,6 +12,7 @@ export const load = (async () => {
 
 	return {
 		items,
-		categories
+		categories,
+		pageTitle: 'Clipping'
 	};
 }) satisfies PageServerLoad;

@@ -20,12 +20,14 @@ export const load = (async ({ locals, params, request }: RequestEvent) => {
 		return {
 			item,
 			categories,
-			languages
+			languages,
+			pageTitle: 'Clipping'
 		};
 	} else {
 		return {
 			categories,
-			languages
+			languages,
+			pageTitle: 'Clipping'
 		};
 	}
 }) satisfies PageServerLoad;

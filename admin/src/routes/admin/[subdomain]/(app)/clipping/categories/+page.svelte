@@ -1,15 +1,30 @@
 <script lang="ts">
-	import ListPage from '$lib/ui/ListPage.svelte';
+	import BasePage from '$lib/ui/BasePage.svelte';
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
 
 	export let data: PageData;
-
-	$: url = `/admin/${$page.params.subdomain}/clipping/categories`;
 </script>
 
-<ListPage name="category" namePlural="categories" editUrl="{url}/edit">
-	<span slot="table">
+<BasePage>
+	<span slot="header-left">
+		<div class="flex items-center">
+			<a href="{$page.url.pathname}/../" class="flex">
+				<h1 class="text-sm font-medium text-gray-900">Clippings</h1>
+			</a>
+		</div>
+	</span>
+	<span slot="header-middle">
+		<h1 class="text-xl font-semibold text-gray-900">Categories</h1>
+	</span>
+	<span slot="header-actions">
+		<a
+			href="{$page.url.pathname}/edit"
+			class="border border-gray-300 bg-white py-2 px-4 text-sm font-light text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none">
+			Create
+		</a>
+	</span>
+	<span slot="main">
 		<table class="min-w-full divide-y divide-gray-300">
 			<thead class="bg-gray-50">
 				<tr>
@@ -28,10 +43,10 @@
 			{#each data.items as item}
 				<tr class="even:bg-white odd:bg-gray-50">
 					<td
-						class="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-gray-900 sm:px-6">
+						class="px-4 py-3.5 whitespace-nowrap text-sm font-medium text-slate-900 sm:px-6">
 						<a
-							href="{url}/edit/{item.id}"
-							class="text-emerald-600 hover:text-emerald-900">
+							href="{$page.url.pathname}/edit/{item.id}"
+							class="text-slate-600 hover:text-gray-900">
 							{item.name}
 						</a>
 					</td>
@@ -42,4 +57,4 @@
 			{/each}
 		</table>
 	</span>
-</ListPage>
+</BasePage>

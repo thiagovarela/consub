@@ -10,12 +10,14 @@ export const load = (async ({ params, request }) => {
 
 	if (!params.category_id)
 		return {
-			languages
+			languages,
+			pageTitle: 'Category'
 		};
 	let category = ClippingsService.getCategoryById({ categoryId: params.category_id });
 	return {
 		item: category,
-		languages
+		languages,
+		pageTitle: 'Category'
 	};
 }) satisfies PageServerLoad;
 

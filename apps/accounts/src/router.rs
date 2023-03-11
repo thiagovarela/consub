@@ -3,7 +3,7 @@ use crate::authentication::{authorization_layer, AccessToken};
 use crate::error::Error;
 use crate::extractors::AccountID;
 use crate::User;
-use aide::axum::routing::post_with;
+use aide::axum::routing::{post_with, get_with};
 use aide::axum::{ApiRouter, IntoApiResponse};
 use aide::transform::TransformOperation;
 use axum::http::StatusCode;
@@ -59,8 +59,16 @@ pub fn create_user_access_token_with_password_docs(op: TransformOperation) -> Tr
 #[debug_handler]
 pub async fn user_profile(
     State(_pool): State<PgPool>, user: User,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<impl IntoApiResponse, Error> {
     Ok((StatusCode::OK, Json(user)))
+}
+
+fn user_profile_docs(op: TransformOperation) -> TransformOperation {
+    op.id("get_user_profile")
+        .description("Get the profile of the current user.")
+        .response::<200, Json<User>>()
+        .security_requirement("ApiKey")
+        .tag("accounts")
 }
 
 #[debug_handler]
@@ -81,7 +89,7 @@ pub fn routes(app_state: AppState) -> ApiRouter {
     );
 
     let protected_routes = ApiRouter::new()
-        .route("/users/profiles", get(user_profile))
+        .api_route("/users/profiles", get_with(user_profile, user_profile_docs))
         .route("/account-keys", get(list_account_keys))
         .layer(middleware::from_fn_with_state(
             app_state.clone(),

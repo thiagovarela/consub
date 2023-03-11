@@ -5,6 +5,7 @@ export const load = (async () => {
 	let categories = await ClippingsService.listCategories({});
 
 	return {
-		items: categories
+		items: categories,
+		pageTitle: 'Categories'
 	};
 }) satisfies PageServerLoad;

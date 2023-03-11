@@ -18,6 +18,7 @@ export type { CreateClippingItemInput } from './models/CreateClippingItemInput';
 export type { CreateUserAccessTokenWithPassword } from './models/CreateUserAccessTokenWithPassword';
 export type { PathCategory } from './models/PathCategory';
 export type { PathItem } from './models/PathItem';
+export type { User } from './models/User';
 
 export { AccountsService } from './services/AccountsService';
 export { ClippingsService } from './services/ClippingsService';
