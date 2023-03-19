@@ -1,6 +1,9 @@
 use accounts::authenticate_user_with_password;
 use clippings::routes;
-use shared::{testing::test_app, AppState};
+use shared::{
+    testing::{test_app, test_opendal_uploader},
+    AppState,
+};
 
 async fn test_token(pool: &sqlx::PgPool) -> String {
     let access_token = authenticate_user_with_password(
@@ -18,7 +21,12 @@ async fn test_token(pool: &sqlx::PgPool) -> String {
 async fn test_create_a_category(pool: sqlx::PgPool) {
     let token = test_token(&pool).await;
 
-    let address = test_app(routes(AppState { db_pool: pool })).await;
+    let opendal = test_opendal_uploader();
+    let address = test_app(routes(AppState {
+        db_pool: pool,
+        opendal,
+    }))
+    .await;
 
     let client = reqwest::Client::new();
 
@@ -42,7 +50,12 @@ async fn test_create_a_category(pool: sqlx::PgPool) {
 async fn test_update_a_category(pool: sqlx::PgPool) {
     let token = test_token(&pool).await;
 
-    let address = test_app(routes(AppState { db_pool: pool })).await;
+    let opendal = test_opendal_uploader();
+    let address = test_app(routes(AppState {
+        db_pool: pool,
+        opendal,
+    }))
+    .await;
 
     let client = reqwest::Client::new();
 
@@ -70,7 +83,12 @@ async fn test_update_a_category(pool: sqlx::PgPool) {
 async fn test_delete_category(pool: sqlx::PgPool) {
     let token = test_token(&pool).await;
 
-    let address = test_app(routes(AppState { db_pool: pool })).await;
+    let opendal = test_opendal_uploader();
+    let address = test_app(routes(AppState {
+        db_pool: pool,
+        opendal,
+    }))
+    .await;
 
     let client = reqwest::Client::new();
 

@@ -1,12 +1,8 @@
 use crate::passwords::verify_password;
 use axum::{http::Request, middleware::Next, response::Response};
 use chrono::{DateTime, Utc};
-use ed25519_dalek::Keypair;
-use jwt_compact::{
-    alg::{Ed25519, SigningKey, VerifyingKey},
-    prelude::*,
-    Algorithm,
-};
+use ed25519_compact::KeyPair;
+use jwt_compact::{alg::Ed25519, prelude::*, Algorithm};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -97,12 +93,12 @@ pub async fn get_claims_from_bearer_token(
         .map_err(|_| Error::AccessTokenInvalid("KID is not a valid uuid".into()))?;
 
     let account_key = get_account_key_by_id(conn, account_key_id).await?;
-    let keypair = Keypair::from_bytes(&account_key.keypair).map_err(|_| {
+    let keypair = KeyPair::from_slice(&account_key.keypair).map_err(|_| {
         Error::AccessTokenKeypair(format!(
             "Unable to retrieve a valid keypair for the account key id {account_key_id}"
         ))
     })?;
-    let key = EdVerifyingKey::from_slice(keypair.public.as_bytes()).map_err(|_| {
+    let key = EdVerifyingKey::from_slice(keypair.pk.as_ref()).map_err(|_| {
         Error::AccessTokenKeypair(format!(
             "Unable to retrieve a valid public key for the account key id {account_key_id}"
         ))

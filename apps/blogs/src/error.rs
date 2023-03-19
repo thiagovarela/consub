@@ -1,3 +1,4 @@
+use aide::OperationIo;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -8,7 +9,7 @@ use serde_with::DisplayFromStr;
 use thiserror::Error;
 use validator::ValidationErrors;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, OperationIo)]
 pub enum Error {
     #[error("Database error")]
     Database(#[from] sqlx::Error),

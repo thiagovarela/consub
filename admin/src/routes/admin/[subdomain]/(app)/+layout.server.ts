@@ -15,6 +15,8 @@ export const load = (async ({ cookies, locals }) => {
 	let gravatar = crypto.createHash('md5').update(user.email).digest('hex');
 
 	return {
-		gravatar
+		gravatar,
+		display_name: null,
+		email: user.email
 	};
 }) satisfies LayoutServerLoad;

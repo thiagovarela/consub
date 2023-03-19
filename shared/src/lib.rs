@@ -1,5 +1,7 @@
 use axum::extract::FromRef;
 use sqlx::{postgres::PgPoolOptions, Executor, PgPool};
+use std::ops::Deref;
+use std::sync::Arc;
 
 pub mod pagination;
 
@@ -18,15 +20,36 @@ pub async fn database_pool(db_url: &str) -> PgPool {
         .expect("Can't connect to database")
 }
 
+#[derive(Debug, Clone)]
+pub struct OpendalUploader(pub Arc<opendal::Operator>);
+
+impl Deref for OpendalUploader {
+    type Target = Arc<opendal::Operator>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(FromRef, Clone)]
 pub struct AppState {
     pub db_pool: PgPool,
+    pub opendal: OpendalUploader,
 }
 
 pub mod testing {
     use std::net::TcpListener;
 
     use tracing_subscriber::EnvFilter;
+
+    use crate::OpendalUploader;
+
+    pub fn test_opendal_uploader() -> OpendalUploader {
+        let builder = opendal::services::Memory::default();
+        let op: opendal::Operator = opendal::Operator::new(builder).unwrap().finish();
+        let opendal = crate::OpendalUploader(std::sync::Arc::new(op));
+        opendal
+    }
 
     pub async fn test_app(routes: aide::axum::ApiRouter) -> String {
         let listener = TcpListener::bind("127.0.0.1:0").expect("Unable to bind to address");

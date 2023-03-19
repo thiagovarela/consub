@@ -3,7 +3,7 @@ use crate::authentication::{authorization_layer, AccessToken};
 use crate::error::Error;
 use crate::extractors::AccountID;
 use crate::User;
-use aide::axum::routing::{post_with, get_with};
+use aide::axum::routing::{get_with, post_with};
 use aide::axum::{ApiRouter, IntoApiResponse};
 use aide::transform::TransformOperation;
 use axum::http::StatusCode;

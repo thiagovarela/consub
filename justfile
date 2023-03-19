@@ -11,7 +11,7 @@ run: db
    cargo run -p api
 
 dev: db
-    cargo watch -x run -p api 
+    cargo watch -x run -p api --ignore 'admin/*'
 
 docs:    
    cargo run -p cli

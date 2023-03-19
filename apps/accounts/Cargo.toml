@@ -27,8 +27,9 @@ phf = { workspace = true }
 schemars = { workspace = true }
 aide = { workspace = true }
 
-ed25519-dalek = "1.0.1"
-jwt-compact = { version = "0.6.0", features = ["ed25519-dalek"] }
+# ed25519-dalek = "1.0.1"
+ed25519-compact = { version = "2", features = ["random"] }
+jwt-compact = { version = "0.7.0", features = ["ed25519-compact"] }
 rand = "0.7.0"
 argon2 = "0.4.1"
 

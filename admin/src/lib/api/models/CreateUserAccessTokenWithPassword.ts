@@ -3,6 +3,7 @@
 /* eslint-disable */
 
 export type CreateUserAccessTokenWithPassword = {
-	email: string;
-	password: string;
+    email: string;
+    password: string;
 };
+

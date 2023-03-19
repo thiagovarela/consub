@@ -1,14 +1,11 @@
 use aide::{axum::routing::get_with, transform::TransformOperation};
-use aide::{
-    axum::ApiRouter,
-    openapi::{OpenApi, Tag},
-    transform::TransformOpenApi,
-};
+use aide::{axum::ApiRouter, openapi::OpenApi, transform::TransformOpenApi};
 use axum::{debug_handler, extract::State, http::StatusCode, Extension};
-use shared::{database_pool, AppState};
+use shared::{database_pool, AppState, OpendalUploader};
 use sqlx::PgPool;
 use std::{net::SocketAddr, sync::Arc};
 
+use opendal::{services, Operator};
 use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
@@ -36,11 +33,6 @@ fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
     api.title("Consub API")
         .summary("Consub application")
         .description("Open API documentation.")
-        .tag(Tag {
-            name: "clippings".into(),
-            description: Some("Clippings Management".into()),
-            ..Default::default()
-        })
         .security_scheme(
             "ApiKey",
             aide::openapi::SecurityScheme::ApiKey {
@@ -63,6 +55,7 @@ fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> Result<(), axum::BoxError> {
+    dotenv::dotenv().ok();
     init_tracing()?;
 
     let db_str =
@@ -72,16 +65,24 @@ async fn main() -> Result<(), axum::BoxError> {
     let pool = database_pool(&db_str).await;
     sqlx::migrate!("../migrations").run(&pool).await?;
 
-    let app_state = AppState { db_pool: pool };
+    let opendal = opendal_operator()?;
+
+    let app_state = AppState {
+        db_pool: pool,
+        opendal: OpendalUploader(Arc::new(opendal)),
+    };
 
     aide::gen::extract_schemas(true);
 
     let mut api = OpenApi::default();
 
+    // TODO: set up rate limiting, cors, etc.
+
     let app = ApiRouter::new()
         .nest("/accounts", accounts::routes(app_state.clone()).into())
         .nest("/blogs", blogs::routes(app_state.clone()).into())
         .nest("/clippings", clippings::routes(app_state.clone()).into())
+        .nest("/media", media::routes(app_state.clone()).into())
         .layer(tower_http::trace::TraceLayer::new_for_http())
         .nest_api_service("/docs", docs_routes(app_state.clone()))
         .api_route(
@@ -115,4 +116,16 @@ fn init_tracing() -> Result<(), axum::BoxError> {
     tracing::subscriber::set_global_default(subscriber)?;
 
     Ok(())
+}
+
+fn opendal_operator() -> Result<opendal::Operator, opendal::Error> {
+    // let mut builder = services::Fs::default();
+    // builder.root("./tmp");
+
+    let mut builder = services::S3::default();
+    builder.bucket("consub-media");
+
+    let op: Operator = Operator::new(builder)?.finish();
+
+    Ok(op)
 }

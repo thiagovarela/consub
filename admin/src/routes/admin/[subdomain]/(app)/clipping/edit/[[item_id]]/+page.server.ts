@@ -43,7 +43,7 @@ export const actions = {
 		const source = values.get('source')?.toString();
 		const source_url = values.get('source_url')?.toString();
 		const source_published_at = values.get('source_published_at')?.toString();
-		const is_featured = values.get('source_url')?.toString();
+		const is_featured = values.get('is_featured')?.toString();
 		const category_id = values.get('category_id')?.toString();
 
 		if (

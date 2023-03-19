@@ -1,5 +1,8 @@
 [env]
 SQLX_OFFLINE="false"
 DATABASE_URL="postgres://consub_rw:localpwd@localhost/consub"
-RUST_LOG="info"
+RUST_LOG="debug"
 SIGN_CONTEXT="consub"
+
+[registries.crates-io]
+protocol = "sparse"

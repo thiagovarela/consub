@@ -24,18 +24,14 @@ CREATE TABLE blogs.posts (
     slug TEXT NOT NULL,
     short_description TEXT NULL,
     keywords TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-    body JSONB NOT NULL,
+    body_json JSONB NOT NULL,
+    body_html TEXT NOT NULL,
+    body_text TEXT NOT NULL,
     locale VARCHAR(5) NOT NULL,
     category_id UUID NULL REFERENCES blogs.categories (id),
     is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     reading_time_minutes INTEGER,
-    translation_of UUID NULL REFERENCES blogs.posts (id), 
-    featured_image TEXT, 
-    featured_image_alt TEXT,
-    featured_image_caption TEXT,
-    og_title TEXT,    
-    og_description TEXT,
-    og_image TEXT,
+    translation_of UUID NULL REFERENCES blogs.posts (id),     
     published_at TIMESTAMP,    
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP    
 );
@@ -44,3 +40,14 @@ CREATE INDEX posts_account_id_idx ON blogs.posts (account_id);
 CREATE INDEX posts_account_id_locale_idx ON blogs.posts (account_id, locale);
 CREATE UNIQUE INDEX posts_slug_locale_account_id_unique ON blogs.posts (slug, locale, account_id);
 SELECT setup_tgr_updated_at('blogs.posts');
+
+CREATE TABLE blogs.post_images (
+    id UUID PRIMARY KEY DEFAULT generate_ulid_uuid(),
+    post_id UUID NOT NULL REFERENCES blogs.posts (id),
+    image_type VARCHAR(255) NOT NULL,
+    media_id UUID NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP    
+);
+CREATE INDEX post_images_id_idx ON blogs.post_images (id);
+CREATE INDEX post_images_post_id_media_id_idx ON blogs.post_images (post_id, media_id);
+SELECT setup_tgr_updated_at('blogs.post_images');

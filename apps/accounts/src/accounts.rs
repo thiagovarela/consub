@@ -1,6 +1,6 @@
 use aide::OperationIo;
-use ed25519_dalek::Keypair;
-use rand::rngs::OsRng;
+
+use ed25519_compact::{KeyPair, Seed};
 
 use chrono::NaiveDateTime;
 use once_cell::sync::Lazy;
@@ -77,7 +77,8 @@ pub async fn create_account(
 pub async fn create_account_key(
     conn: &mut PgConnection, account_id: Uuid,
 ) -> Result<AccountKey, Error> {
-    let keypair: Keypair = Keypair::generate(&mut OsRng);
+    let keypair = KeyPair::from_seed(Seed::default());
+    // let keypair: Keypair = Keypair::generate(&mut OsRng);
     Ok(sqlx::query_as!(
         AccountKey,
         r#"
@@ -86,7 +87,7 @@ pub async fn create_account_key(
         RETURNING id, account_id, keypair, expires_at
         "#,
         account_id,
-        &keypair.to_bytes()
+        &keypair.as_ref()
     )
     .fetch_one(conn)
     .await?)

@@ -20,6 +20,7 @@ validator = { workspace = true }
 serde_with = { workspace = true }
 phf = { workspace = true }
 aide = { workspace = true }
+schemars = { workspace = true }
 
 slug = "0.1"
 

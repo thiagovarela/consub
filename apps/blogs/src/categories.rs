@@ -1,11 +1,12 @@
 use chrono::NaiveDateTime;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use uuid::Uuid;
 
 use crate::error::{conflict_error, Error};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Category {
     pub id: Uuid,
     pub account_id: Uuid,
@@ -16,7 +17,7 @@ pub struct Category {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct CreateCategoryInput {
     pub name: String,
     pub locale: String,
@@ -44,7 +45,7 @@ pub async fn create_category(
     .map_err(conflict_error)
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 pub struct ChangeCategoryInput {
     pub name: Option<String>,
     pub locale: Option<String>,
@@ -114,7 +115,7 @@ pub async fn get_category_by_id(
     .await?)
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, JsonSchema)]
 pub struct CategoryQuery {
     pub name: Option<String>,
     pub locale: Option<String>,
