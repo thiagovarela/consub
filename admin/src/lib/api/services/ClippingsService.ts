@@ -30,7 +30,7 @@ export class ClippingsService {
     }): CancelablePromise<Array<Category>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/clippings/admin/categories',
+            url: '/admin/clippings/categories',
             query: {
                 'locale': locale,
                 'name': name,
@@ -51,7 +51,7 @@ export class ClippingsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/clippings/admin/categories',
+            url: '/admin/clippings/categories',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -69,7 +69,7 @@ export class ClippingsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/clippings/admin/categories/{category_id}',
+            url: '/admin/clippings/categories/{category_id}',
             path: {
                 'category_id': categoryId,
             },
@@ -88,7 +88,7 @@ export class ClippingsService {
     }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/clippings/admin/categories/{category_id}',
+            url: '/admin/clippings/categories/{category_id}',
             path: {
                 'category_id': categoryId,
             },
@@ -109,7 +109,7 @@ export class ClippingsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/clippings/admin/categories/{category_id}',
+            url: '/admin/clippings/categories/{category_id}',
             path: {
                 'category_id': categoryId,
             },
@@ -155,7 +155,7 @@ export class ClippingsService {
     }): CancelablePromise<Array<ClippingItem>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/clippings/admin/items',
+            url: '/admin/clippings/items',
             query: {
                 'after': after,
                 'before': before,
@@ -182,7 +182,7 @@ export class ClippingsService {
     }): CancelablePromise<ClippingItem> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/clippings/admin/items',
+            url: '/admin/clippings/items',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -200,7 +200,7 @@ export class ClippingsService {
     }): CancelablePromise<ClippingItem> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/clippings/admin/items/{item_id}',
+            url: '/admin/clippings/items/{item_id}',
             path: {
                 'item_id': itemId,
             },
@@ -221,7 +221,7 @@ export class ClippingsService {
     }): CancelablePromise<ClippingItem> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/clippings/admin/items/{item_id}',
+            url: '/admin/clippings/items/{item_id}',
             path: {
                 'item_id': itemId,
             },

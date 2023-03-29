@@ -6,7 +6,8 @@ CREATE TABLE accounts.accounts (
     id UUID PRIMARY KEY DEFAULT generate_ulid_uuid(),
     name VARCHAR(100) NOT NULL,
     subdomain VARCHAR(100) UNIQUE NOT NULL,    
-    feature_flags JSONB NOT NULL DEFAULT '{}',    
+    feature_flags JSONB NOT NULL DEFAULT '{}',
+    origin TEXT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 SELECT setup_tgr_updated_at('accounts.accounts');

@@ -3,6 +3,8 @@ CREATE SCHEMA media;
 CREATE TABLE media.images (
     id UUID PRIMARY KEY DEFAULT generate_ulid_uuid(),
     account_id UUID NOT NULL REFERENCES accounts.accounts (id),
+    alt TEXT NULL,
+    caption TEXT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

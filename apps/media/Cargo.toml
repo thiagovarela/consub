@@ -14,7 +14,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
-thiserror = { workspace = true }
 tracing = { workspace = true }
 validator = { workspace = true }
 serde_with = { workspace = true }
@@ -22,10 +21,12 @@ phf = { workspace = true }
 schemars = { workspace = true }
 aide = { workspace = true }
 opendal = { workspace = true }
+once_cell = {workspace = true}
 futures = "0.3"
 tokio-util = { version = "0.7.7", features = ["io"] }
 rusty_ulid = "2.0.0"
 itertools = "0.10.5"
+
 
 accounts = { path = "../accounts" }
 shared = { path = "../../shared" }

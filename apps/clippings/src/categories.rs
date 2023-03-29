@@ -6,8 +6,6 @@ use uuid::Uuid;
 
 use shared::pagination::CursorPagination;
 
-use crate::error::{conflict_error, Error};
-
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Category {
     #[schemars(with = "String")]
@@ -46,7 +44,7 @@ pub struct CategoryQuery {
 
 pub async fn create_category(
     conn: &mut PgConnection, account_id: Uuid, input: CreateCategoryInput,
-) -> Result<Category, Error> {
+) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -61,12 +59,11 @@ pub async fn create_category(
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 pub async fn change_category(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid, input: ChangeCategoryInput,
-) -> Result<Category, Error> {
+) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -86,13 +83,12 @@ pub async fn change_category(
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 pub async fn delete_category(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid,
-) -> Result<Category, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Category, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         DELETE FROM clippings.categories
@@ -104,13 +100,13 @@ pub async fn delete_category(
         account_id
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 pub async fn get_category_by_id(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid,
-) -> Result<Category, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Category, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         SELECT * FROM clippings.categories
@@ -121,13 +117,13 @@ pub async fn get_category_by_id(
         account_id
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 pub async fn list_categories(
     conn: &mut PgConnection, account_id: Uuid, query: CategoryQuery,
-) -> Result<Vec<Category>, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Vec<Category>, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         SELECT * FROM clippings.categories
@@ -144,5 +140,5 @@ pub async fn list_categories(
         query.pagination.after
     )
     .fetch_all(conn)
-    .await?)
+    .await
 }

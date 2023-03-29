@@ -32,7 +32,7 @@ test:
     cargo test --workspace
 
 deploy:
-    fly launch --image registry.fly.io/{{api_name}}:{{tag}} --force-machines  --region mad
+    fly deploy --image-label {{tag}} --local-only --push --force-machines --region mad
 
 check-db:
     sqlx migrate info --database_url=postgres://consub_rw:localpwd@localhost/consub    

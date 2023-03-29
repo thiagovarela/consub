@@ -23,7 +23,7 @@ export class AccountsService {
     }): CancelablePromise<AccessToken> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/accounts/users/access-tokens/passwords',
+            url: '/admin/accounts/users/access-tokens/passwords',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -37,7 +37,7 @@ export class AccountsService {
     public static getUserProfile(): CancelablePromise<User> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/accounts/users/profiles',
+            url: '/admin/accounts/users/profiles',
         });
     }
 

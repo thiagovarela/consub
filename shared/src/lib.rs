@@ -1,4 +1,8 @@
 use axum::extract::FromRef;
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
+use axum::Json;
+use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, Executor, PgPool};
 use std::ops::Deref;
 use std::sync::Arc;
@@ -37,6 +41,48 @@ pub struct AppState {
     pub opendal: OpendalUploader,
 }
 
+#[derive(Debug, aide::OperationIo)]
+pub enum AppError {
+    InternalServerError(anyhow::Error),
+    BadRequest(String),
+    Forbidden(String),
+    Unauthorized(String),
+    NotFound(String),
+    ValidationError(String),
+}
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        let (status, error_message) = match self {
+            AppError::InternalServerError(_inner) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "something went wrong".to_string())
+            }
+            AppError::ValidationError(_inner) => {
+                (StatusCode::UNPROCESSABLE_ENTITY, "validation errors".to_string())
+            }
+            AppError::BadRequest(message) => (StatusCode::BAD_REQUEST, message),
+            AppError::Forbidden(message) => (StatusCode::FORBIDDEN, message),
+            AppError::Unauthorized(message) => (StatusCode::UNAUTHORIZED, message),
+            AppError::NotFound(message) => (StatusCode::NOT_FOUND, message),
+        };
+
+        let body = Json(json!({
+            "error": error_message,
+        }));
+
+        (status, body).into_response()
+    }
+}
+
+impl<E> From<E> for AppError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self::InternalServerError(err.into())
+    }
+}
+
 pub mod testing {
     use std::net::TcpListener;
 
@@ -47,8 +93,8 @@ pub mod testing {
     pub fn test_opendal_uploader() -> OpendalUploader {
         let builder = opendal::services::Memory::default();
         let op: opendal::Operator = opendal::Operator::new(builder).unwrap().finish();
-        let opendal = crate::OpendalUploader(std::sync::Arc::new(op));
-        opendal
+        
+        crate::OpendalUploader(std::sync::Arc::new(op))
     }
 
     pub async fn test_app(routes: aide::axum::ApiRouter) -> String {

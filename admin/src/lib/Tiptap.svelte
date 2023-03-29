@@ -6,39 +6,43 @@
 	import StarterKit from '@tiptap/starter-kit';
 	import CharacterCount from '@tiptap/extension-character-count';
 	import Link from '@tiptap/extension-link';
-	import { ImageSet } from '$lib/tiptap/imageset';
-	import Dropcursor from '@tiptap/extension-dropcursor';
+	import Placeholder from '@tiptap/extension-placeholder';
+	import { TipTapImageSet } from '$lib/tiptap/imageset';
 
 	import MediaUpload from '$lib/ui/MediaUpload.svelte';
+	import type { ImageSet } from './api';
+	import { buildSrc, buildSrcset } from './images';
+	import BubbleMenu from '$lib/tiptap/BubbleMenu.svelte';
 
 	let element: Element;
 	let editor: Editor;
 
 	let imageUploadModal: boolean = false;
 
-	export let initialContent: object = {};
-	export let contentJsonString: string;
-	export let contentHtml: string;
-	export let contentText: string;
+	export let contentJsonString: string | undefined;
+	export let contentHtml: string | undefined;
+	export let contentText: string | undefined;
 
 	onMount(() => {
 		editor = new Editor({
 			element: element,
 			extensions: [
 				StarterKit,
-				Dropcursor,
 				CharacterCount.configure({}),
 				Link.configure({
 					openOnClick: false
 				}),
-				ImageSet.configure({})
+				TipTapImageSet.configure({}),
+				Placeholder.configure({
+					placeholder: 'Start typing...'
+				})
 			],
 			editorProps: {
 				attributes: {
-					class: 'prose mx-auto p-5 prose-sm sm:prose lg:prose-lg m-5 focus:outline-none'
+					class: 'prose prose-sm sm:prose lg:prose-lg focus:outline-none'
 				}
 			},
-			content: initialContent,
+			content: contentJsonString ? JSON.parse(contentJsonString) : null,
 			onTransaction: () => {
 				// force re-render so `editor.isActive` works as expected
 				editor = editor;
@@ -49,6 +53,18 @@
 			contentHtml = editor.getHTML();
 			contentText = editor.getText();
 		});
+
+		editor.on('selectionUpdate', ({ editor }) => {
+			if (editor.isActive('image')) {
+				const { state } = editor.view;
+				const { from, to } = state.selection;
+				const node = state.doc.nodeAt(from);
+				if (node && node.type.name === 'image') {
+					const { src, srcset, alt, title } = node.attrs;
+					console.log(src);
+				}
+			}
+		});
 	});
 
 	onDestroy(() => {
@@ -57,8 +73,10 @@
 		}
 	});
 
-	const onMediaSelect = (srcset: string) => {
-		editor.chain().focus().setImageSet({ srcset }).run();
+	const onMediaSelect = (imageSet: ImageSet[]) => {
+		let srcset = imageSet.map(buildSrcset).join(', ');
+		let src = buildSrc(imageSet[0]);
+		editor.chain().focus().setImageSet({ srcset, src }).run();
 	};
 </script>
 
@@ -73,8 +91,29 @@
 	:global(.ProseMirror a) {
 		@apply text-slate-500 hover:text-slate-700;
 	}
+	:global(img.ProseMirror-selectednode) {
+		@apply ring-2 ring-slate-500;
+	}
+	:global(.ProseMirror p.is-editor-empty:first-child::before) {
+		color: #adb5bd;
+		content: attr(data-placeholder);
+		float: left;
+		height: 0;
+		pointer-events: none;
+	}
 	.editor-container {
-		@apply bg-white w-full;
+		@apply w-full;
+	}
+	.bubble-menu {
+		display: flex;
+		background-color: #0d0d0d;
+		padding: 0.2rem;
+		border-radius: 0.5rem;
+		transition: visibility 0.1s ease, opacity 0.1s ease;
+		opacity: 0;
+	}
+	.bubble-menu.is-active {
+		opacity: 1;
 	}
 </style>
 
@@ -254,11 +293,31 @@
 <div class="editor-container" bind:this={element} />
 
 {#if editor}
-	<div>
+	<!-- <div>
 		{editor.storage.characterCount.characters()} characters
 		<br />
 		{editor.storage.characterCount.words()} words
-	</div>
+	</div> -->
+	<BubbleMenu
+		bind:editor
+		shouldShow={({ editor }) => {
+			return editor.isActive('image');
+		}}>
+		<div>
+			<div class="editor-toolbar">
+				<button
+					on:click|preventDefault={() => editor.chain().focus().toggleBold().run()}
+					disabled={!editor.can().chain().focus().toggleBold().run()}
+					class="button">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+						<path fill="none" d="M0 0h24v24H0z" />
+						<path
+							d="M8 11h4.5a2.5 2.5 0 1 0 0-5H8v5zm10 4.5a4.5 4.5 0 0 1-4.5 4.5H6V4h6.5a4.5 4.5 0 0 1 3.256 7.606A4.498 4.498 0 0 1 18 15.5zM8 13v5h5.5a2.5 2.5 0 1 0 0-5H8z" />
+					</svg>
+				</button>
+			</div>
+		</div>
+	</BubbleMenu>
 {/if}
 
 <MediaUpload {onMediaSelect} bind:show={imageUploadModal} />

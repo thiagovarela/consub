@@ -11,10 +11,11 @@ export type Post = {
     category_id?: string | null;
     id: string;
     is_featured: boolean;
-    keywords: Array<string>;
     locale: string;
+    meta_description?: string | null;
+    meta_keywords?: string | null;
+    meta_title?: string | null;
     published_at?: string | null;
-    reading_time_minutes?: number | null;
     short_description?: string | null;
     slug: string;
     title: string;

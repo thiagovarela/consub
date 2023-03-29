@@ -2,7 +2,7 @@ tag := env_var_or_default('tag', 'latest')
 admin_name := env_var_or_default('admin_name', 'admin')
 
 deploy:
-    fly launch --image registry.fly.io/{{admin_name}}:{{tag}} --force-machines --region mad
+    fly deploy --image-label {{tag}} --local-only --force-machines --push --region mad    
 
 build:
     pnpm build

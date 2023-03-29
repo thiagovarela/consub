@@ -1,6 +1,6 @@
-<script lang="ts">	
+<script lang="ts">
 	import { page } from '$app/stores';
-	import type { PageData } from './$types';	
+	import type { PageData } from './$types';
 	import BasePage from '$lib/ui/BasePage.svelte';
 
 	export let data: PageData;

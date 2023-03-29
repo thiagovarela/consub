@@ -10,7 +10,7 @@
 	<span slot="header-left">
 		<div class="flex items-center">
 			<a href="{$page.url.pathname}/../" class="flex">
-				<h1 class="text-sm font-medium text-gray-900">Clippings</h1>
+				<h1 class="text-sm font-medium text-gray-900">Posts</h1>
 			</a>
 		</div>
 	</span>

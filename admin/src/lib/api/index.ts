@@ -37,4 +37,3 @@ export { BlogsService } from './services/BlogsService';
 export { ClippingsService } from './services/ClippingsService';
 export { DefaultService } from './services/DefaultService';
 export { MediaService } from './services/MediaService';
-export { PublicClippingsService } from './services/PublicClippingsService';

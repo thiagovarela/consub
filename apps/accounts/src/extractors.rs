@@ -8,14 +8,15 @@ use axum::{
 use axum_auth::AuthBearer;
 use serde::Serialize;
 
+use shared::AppError;
 use sqlx::PgPool;
 
 use crate::{
     authentication::{get_claims_from_bearer_token, ConsubClaims},
-    error::Error,
     users::get_user_by_id,
     Account, User,
 };
+use anyhow::anyhow;
 use uuid::Uuid;
 
 use crate::accounts::{get_account_by_subdomain, get_account_by_x_api_key};
@@ -32,7 +33,7 @@ where
     PgPool: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = Error;
+    type Rejection = AppError;
 
     /// Extracts the account ID from the request.
     /// The x-api-key takes precedence to fetch the account ID.    
@@ -45,18 +46,13 @@ where
             }
         }
 
-        let Host(hostname) = Host::from_request_parts(parts, state)
-            .await
-            .map_err(|_| Error::InvalidAccountID("Unable to parse the hostname".into()))?;
+        let Host(hostname) = Host::from_request_parts(parts, state).await?;
+
         let domain = parse_domain_name(&hostname)
-            .map_err(|_| Error::InvalidAccountID("Provided domain is not valid".into()))?;
+            .map_err(|_| AppError::BadRequest("Invalid domain name".into()))?;
         let prefix = match domain.prefix() {
             Some(prefix) => prefix,
-            None => {
-                return Err(Error::InvalidAccountID(
-                    "Provided domain is not valid".into(),
-                ))
-            }
+            None => return Err(AppError::BadRequest("Invalid domain name".into())),
         };
         // Tries to fetch using the subdomain.
         let pool = PgPool::from_ref(state);
@@ -64,7 +60,7 @@ where
             return Ok(AccountID(account.id));
         }
 
-        Err(Error::InvalidAccountID("Account ID was not found".into()))
+        Err(AppError::BadRequest("AccountID is not valid".into()))
     }
 }
 
@@ -74,7 +70,7 @@ where
     PgPool: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = Error;
+    type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let claims = ConsubClaims::from_request_parts(parts, state).await?;
@@ -89,7 +85,7 @@ impl<S> FromRequestParts<S> for APIKey
 where
     S: Send + Sync,
 {
-    type Rejection = Error;
+    type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         const X_API_KEY_HEADER_KEY: &str = "X-Api-Key";
@@ -102,7 +98,7 @@ where
             return Ok(APIKey(api_key));
         }
 
-        Err(Error::InvalidAPIKey("Invalid X-API-KEY header".into()))
+        Err(anyhow!("API Key is not valid").into())
     }
 }
 
@@ -112,12 +108,12 @@ where
     PgPool: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = Error;
+    type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let AuthBearer(token) = AuthBearer::from_request_parts(parts, state)
             .await
-            .map_err(|_| Error::AuthBearer)?;
+            .map_err(|_| anyhow!("Unable to get authorization bearer token"))?;
         let pool = PgPool::from_ref(state);
         let claims = get_claims_from_bearer_token(&pool, token).await?;
         Ok(claims)
@@ -130,7 +126,7 @@ where
     PgPool: FromRef<S>,
     S: Send + Sync,
 {
-    type Rejection = Error;
+    type Rejection = AppError;
 
     /// Extracts the account from the x-api-key.
     /// The x-api-key takes precedence to fetch the account ID.    
@@ -142,6 +138,6 @@ where
                 return Ok(account);
             }
         }
-        Err(Error::InvalidAccountID("Account was not found".into()))
+        Err(anyhow!("Account is not valid").into())
     }
 }

@@ -1,10 +1,9 @@
 use chrono::NaiveDateTime;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
 use sqlx::PgConnection;
 use uuid::Uuid;
-
-use crate::error::{conflict_error, Error};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Category {
@@ -26,7 +25,7 @@ pub struct CreateCategoryInput {
 
 pub async fn create_category(
     conn: &mut PgConnection, account_id: Uuid, input: CreateCategoryInput,
-) -> Result<Category, Error> {
+) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -42,7 +41,6 @@ pub async fn create_category(
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -55,7 +53,7 @@ pub struct ChangeCategoryInput {
 
 pub async fn change_category(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid, input: ChangeCategoryInput,
-) -> Result<Category, Error> {
+) -> Result<Category, sqlx::Error> {
     sqlx::query_as!(
         Category,
         r#"
@@ -77,13 +75,12 @@ pub async fn change_category(
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 pub async fn delete_category(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid,
-) -> Result<Category, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Category, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         DELETE FROM blogs.categories
@@ -95,13 +92,13 @@ pub async fn delete_category(
         account_id
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 pub async fn get_category_by_id(
     conn: &mut PgConnection, category_id: Uuid, account_id: Uuid,
-) -> Result<Category, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Category, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         SELECT * FROM blogs.categories
@@ -112,7 +109,7 @@ pub async fn get_category_by_id(
         account_id
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 #[derive(Debug, serde::Deserialize, JsonSchema)]
@@ -124,8 +121,8 @@ pub struct CategoryQuery {
 
 pub async fn list_categories(
     conn: &mut PgConnection, account_id: Uuid, query: CategoryQuery,
-) -> Result<Vec<Category>, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Vec<Category>, sqlx::Error> {
+    sqlx::query_as!(
         Category,
         r#"
         SELECT * FROM blogs.categories
@@ -140,5 +137,22 @@ pub async fn list_categories(
         query.translation_of
     )
     .fetch_all(conn)
-    .await?)
+    .await
+}
+
+pub async fn get_category_by_ids(
+    conn: &mut PgConnection, account_id: Uuid, category_ids: Vec<Uuid>,
+) -> Result<Vec<Category>, sqlx::Error> {
+    sqlx::query_as!(
+        Category,
+        r#"
+        SELECT * FROM blogs.categories
+        WHERE id = ANY($1) 
+        AND account_id = $2
+        "#,
+        &category_ids,
+        account_id
+    )
+    .fetch_all(conn)
+    .await
 }

@@ -18,16 +18,4 @@ export class DefaultService {
         });
     }
 
-    /**
-     * Health check endpoint
-     * @returns any plain text
-     * @throws ApiError
-     */
-    public static getHealth(): CancelablePromise<any> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/health',
-        });
-    }
-
 }

@@ -12,7 +12,7 @@ declare global {
 		}
 		// interface PageData {}
 		// interface Platform {}
-		interface Error {			
+		interface Error {
 			message: string;
 		}
 	}

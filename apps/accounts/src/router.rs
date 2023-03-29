@@ -1,6 +1,6 @@
 use crate::accounts::CreatePublicAccountInput;
 use crate::authentication::{authorization_layer, AccessToken};
-use crate::error::Error;
+
 use crate::extractors::AccountID;
 use crate::User;
 use aide::axum::routing::{get_with, post_with};
@@ -11,14 +11,14 @@ use axum::routing::{get, post};
 use axum::{debug_handler, middleware, Json};
 use axum::{extract::State, response::IntoResponse};
 use schemars::JsonSchema;
-use shared::AppState;
+use shared::{AppError, AppState};
 use sqlx::PgPool;
 use validator::Validate;
 
 #[debug_handler]
 pub async fn create_account(
     State(pool): State<PgPool>, Json(body): Json<CreatePublicAccountInput>,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<impl IntoResponse, AppError> {
     body.validate()?;
     let account = crate::accounts::create_account_with_user(&pool, body).await?;
     Ok((StatusCode::CREATED, Json(account)))
@@ -31,11 +31,10 @@ pub struct CreateUserAccessTokenWithPassword {
     pub password: String,
 }
 
-#[debug_handler]
 pub async fn create_user_access_token_with_password(
     State(pool): State<PgPool>, AccountID(account_id): AccountID,
     Json(body): Json<CreateUserAccessTokenWithPassword>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     body.validate()?;
     let access_token = crate::authentication::authenticate_user_with_password(
         &pool,
@@ -56,10 +55,9 @@ pub fn create_user_access_token_with_password_docs(op: TransformOperation) -> Tr
         .tag("accounts")
 }
 
-#[debug_handler]
 pub async fn user_profile(
     State(_pool): State<PgPool>, user: User,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     Ok((StatusCode::OK, Json(user)))
 }
 
@@ -71,10 +69,9 @@ fn user_profile_docs(op: TransformOperation) -> TransformOperation {
         .tag("accounts")
 }
 
-#[debug_handler]
 pub async fn list_account_keys(
     State(pool): State<PgPool>, user: User,
-) -> Result<impl IntoResponse, Error> {
+) -> Result<impl IntoResponse, AppError> {
     let keys = crate::accounts::get_account_keys(&pool, user.account_id).await?;
     Ok((StatusCode::OK, Json(keys)))
 }

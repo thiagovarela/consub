@@ -15,6 +15,7 @@ axum-extra = { version = "0.4", features = ["query"] }
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 aide = { version = "0.10.0", features = ["axum", "redoc", "macros", "axum-extra-query", "axum-multipart"] }
+anyhow = "1"
 
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.2.2", features = ["serde", "v4"] }
@@ -22,7 +23,6 @@ serde = { version = "1.0.151", features = ["serde_derive"] }
 serde_derive = "1.0.151"
 serde_json = { version = "1.0.91", features = ["raw_value"] }
 serde_with = "2.2.0"
-thiserror = "1.0.38"
 axum-auth = "0.4.0"
 addr = "0.15.6"
 slug = "0.1.4"

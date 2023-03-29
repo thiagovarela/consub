@@ -5,7 +5,6 @@ use sqlx::PgConnection;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::error::{conflict_error, Error};
 use shared::pagination::CursorPagination;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -93,8 +92,8 @@ pub struct ClippingItemQuery {
 
 pub async fn create_clipping_item(
     conn: &mut PgConnection, account_id: Uuid, user_id: Uuid, input: CreateClippingItemInput,
-) -> Result<ClippingItem, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<ClippingItem, sqlx::Error> {
+    sqlx::query_as!(
         ClippingItem,
         r#"
         INSERT INTO clippings.items (
@@ -126,13 +125,13 @@ pub async fn create_clipping_item(
         &input.tags,
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 pub async fn change_clipping_item(
     conn: &mut PgConnection, account_id: Uuid, clipping_item_id: Uuid,
     input: ChangeClippingItemInput,
-) -> Result<ClippingItem, Error> {
+) -> Result<ClippingItem, sqlx::Error> {
     let item = get_clipping_item(conn, account_id, clipping_item_id).await?;
 
     sqlx::query_as!(
@@ -178,13 +177,12 @@ pub async fn change_clipping_item(
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 pub async fn list_clipping_items(
     conn: &mut PgConnection, account_id: Uuid, query: ClippingItemQuery,
-) -> Result<Vec<ClippingItem>, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Vec<ClippingItem>, sqlx::Error> {
+    sqlx::query_as!(
         ClippingItem,
         r#"SELECT *
         FROM clippings.items
@@ -201,13 +199,13 @@ pub async fn list_clipping_items(
         query.pagination.take
     )
     .fetch_all(conn)
-    .await?)
+    .await
 }
 
 pub async fn get_clipping_item(
     conn: &mut PgConnection, account_id: Uuid, id: Uuid,
-) -> Result<ClippingItem, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<ClippingItem, sqlx::Error> {
+    sqlx::query_as!(
         ClippingItem,
         r#"SELECT *
         FROM clippings.items
@@ -217,13 +215,13 @@ pub async fn get_clipping_item(
         id
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 pub async fn public_list_clipping_items(
     conn: &mut PgConnection, account_id: Uuid, query: ClippingItemQuery,
-) -> Result<Vec<ClippingItem>, Error> {
-    Ok(sqlx::query_as!(
+) -> Result<Vec<ClippingItem>, sqlx::Error> {
+    sqlx::query_as!(
         ClippingItem,
         r#"SELECT *
         FROM clippings.items
@@ -242,5 +240,5 @@ pub async fn public_list_clipping_items(
         query.pagination.take
     )
     .fetch_all(conn)
-    .await?)
+    .await
 }

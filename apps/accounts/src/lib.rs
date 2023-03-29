@@ -1,6 +1,5 @@
 mod accounts;
 mod authentication;
-mod error;
 mod extractors;
 mod passwords;
 mod router;

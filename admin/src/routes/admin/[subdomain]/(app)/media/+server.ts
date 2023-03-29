@@ -2,7 +2,7 @@ import { OpenAPI } from '$lib/api';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const POST = (async ({ request, params }) => {
+export const POST = (async ({ request, fetch }) => {
 	let incoming = await request.formData();
 
 	// TODO: use streams

@@ -11,10 +11,7 @@ use sqlx::PgConnection;
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::{
-    error::{conflict_error, Error},
-    users::CreateUserWithPasswordInput,
-};
+use crate::users::CreateUserWithPasswordInput;
 
 /// Account represents a single account.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, OperationIo)]
@@ -22,6 +19,7 @@ pub struct Account {
     pub id: Uuid,
     pub name: String,
     pub subdomain: String,
+    pub origin: Option<String>,
     #[schemars(with = "AccountFeatureFlags")]
     pub feature_flags: sqlx::types::Json<AccountFeatureFlags>,
     pub updated_at: NaiveDateTime,
@@ -50,36 +48,36 @@ pub struct AccountKey {
 pub struct CreateAccountInput {
     pub name: String,
     pub subdomain: String,
+    pub origin: Option<String>,
 }
 
 static SUBDOMAIN_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[0-9A-Za-z\-]+$").unwrap());
 
 pub async fn create_account(
     conn: &mut PgConnection, input: CreateAccountInput,
-) -> Result<Account, Error> {
+) -> Result<Account, sqlx::Error> {
     sqlx::query_as!(
         Account,
         r#"
-        INSERT INTO accounts.accounts (name, subdomain)
-        VALUES ($1, $2)
-        RETURNING id, name, subdomain, 
+        INSERT INTO accounts.accounts (name, subdomain, origin)
+        VALUES ($1, $2, $3)
+        RETURNING id, name, subdomain, origin, 
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
         updated_at
         "#,
         input.name,
-        input.subdomain
+        input.subdomain,
+        input.origin
     )
     .fetch_one(conn)
     .await
-    .map_err(conflict_error)
 }
 
 pub async fn create_account_key(
     conn: &mut PgConnection, account_id: Uuid,
-) -> Result<AccountKey, Error> {
-    let keypair = KeyPair::from_seed(Seed::default());
-    // let keypair: Keypair = Keypair::generate(&mut OsRng);
-    Ok(sqlx::query_as!(
+) -> Result<AccountKey, sqlx::Error> {
+    let keypair = KeyPair::from_seed(Seed::default());    
+    sqlx::query_as!(
         AccountKey,
         r#"
         INSERT INTO accounts.account_keys (account_id, keypair)
@@ -90,7 +88,7 @@ pub async fn create_account_key(
         &keypair.as_ref()
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }
 
 /// CreatePublicAccountInput is used to create a new account with a user.
@@ -103,14 +101,16 @@ pub struct CreatePublicAccountInput {
     pub name: String,
     #[validate(regex = "SUBDOMAIN_REGEX")]
     pub subdomain: String,
+    pub origin: Option<String>,
 }
 
 pub async fn create_account_with_user(
     pool: &sqlx::PgPool, input: CreatePublicAccountInput,
-) -> Result<Account, Error> {
+) -> Result<Account, anyhow::Error> {
     let account_input = CreateAccountInput {
         name: input.name,
         subdomain: input.subdomain,
+        origin: input.origin,
     };
 
     let mut tx = pool.begin().await?;
@@ -137,7 +137,7 @@ pub async fn get_account_by_subdomain(
     sqlx::query_as!(
         Account,
         r#"
-        SELECT id, name, subdomain, 
+        SELECT id, name, subdomain, origin,
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
         updated_at
         FROM accounts.accounts
@@ -155,7 +155,7 @@ pub async fn get_account_by_x_api_key(
     sqlx::query_as!(
         Account,
         r#"
-        SELECT id, name, subdomain,
+        SELECT id, name, subdomain, origin,
         feature_flags as "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
         updated_at
         FROM accounts.accounts

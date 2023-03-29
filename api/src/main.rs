@@ -1,5 +1,5 @@
-use aide::{axum::routing::get_with, transform::TransformOperation};
 use aide::{axum::ApiRouter, openapi::OpenApi, transform::TransformOpenApi};
+use axum::routing::get;
 use axum::{debug_handler, extract::State, http::StatusCode, Extension};
 use shared::{database_pool, AppState, OpendalUploader};
 use sqlx::PgPool;
@@ -9,7 +9,7 @@ use opendal::{services, Operator};
 use tracing::info;
 use tracing_subscriber::layer::SubscriberExt;
 
-use crate::docs::docs_routes;
+use crate::docs::{docs_routes, public_docs};
 
 mod docs;
 #[debug_handler]
@@ -24,11 +24,6 @@ pub async fn health_check(State(pool): State<PgPool>) -> Result<String, (StatusC
             )
         })
 }
-fn health_checkdocs(op: TransformOperation) -> TransformOperation {
-    op.description("Health check endpoint")
-        .response::<200, String>()
-}
-
 fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
     api.title("Consub API")
         .summary("Consub application")
@@ -53,6 +48,31 @@ fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
         )
 }
 
+fn public_api_docs(api: TransformOpenApi) -> TransformOpenApi {
+    // let mut oa = api.inner_mut();
+    // Iterates over all paths and check if the extension x-public is set to true.
+    // If so, the path is removed from the OpenAPI document.
+    // oa.paths = oa.paths.clone().filter(|path| {
+    //     path.extensions.get("x-public").map(|ext| ext == "true").unwrap_or(false)
+    // });
+    // oa.components = oa.components.clone().filter(|component| {
+    //     component.extensions.get("x-public").map(|ext| ext == "true").unwrap_or(false)
+    // });
+
+    api.title("Consub API")
+        .summary("Consub application")
+        .description("Open API documentation.")
+        .security_scheme(
+            "ApiKey",
+            aide::openapi::SecurityScheme::ApiKey {
+                location: aide::openapi::ApiKeyLocation::Header,
+                name: "X-Api-Key".into(),
+                description: Some("A key to access resources of your account.".into()),
+                extensions: Default::default(),
+            },
+        )
+}
+
 #[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> Result<(), axum::BoxError> {
     dotenv::dotenv().ok();
@@ -60,7 +80,6 @@ async fn main() -> Result<(), axum::BoxError> {
 
     let db_str =
         std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable is not set");
-    let address: SocketAddr = "[::0]:8000".parse()?;
 
     let pool = database_pool(&db_str).await;
     sqlx::migrate!("../migrations").run(&pool).await?;
@@ -75,23 +94,40 @@ async fn main() -> Result<(), axum::BoxError> {
     aide::gen::extract_schemas(true);
 
     let mut api = OpenApi::default();
+    let mut public_api = OpenApi::default();
 
-    // TODO: set up rate limiting, cors, etc.
+    let admin = ApiRouter::new()
+        .nest("/accounts", accounts::routes(app_state.clone()))
+        .nest("/blogs", blogs::routes(app_state.clone()))
+        .nest("/clippings", clippings::routes(app_state.clone()))
+        .nest("/media", media::routes(app_state.clone()));
 
-    let app = ApiRouter::new()
-        .nest("/accounts", accounts::routes(app_state.clone()).into())
-        .nest("/blogs", blogs::routes(app_state.clone()).into())
-        .nest("/clippings", clippings::routes(app_state.clone()).into())
-        .nest("/media", media::routes(app_state.clone()).into())
-        .layer(tower_http::trace::TraceLayer::new_for_http())
-        .nest_api_service("/docs", docs_routes(app_state.clone()))
-        .api_route(
-            "/health",
-            get_with(health_check, health_checkdocs).with_state(app_state.clone()),
-        )
+    // Prefixes all paths with /admin.
+    let admin = ApiRouter::new()
+        .nest("/admin", admin)
+        .nest_api_service("/admin/docs", docs_routes(app_state.clone()))
         .finish_api_with(&mut api, api_docs)
         .layer(Extension(Arc::new(api)));
 
+    let public = ApiRouter::new()
+        .nest("/blogs", blogs::public_routes(app_state.clone()))
+        .nest("/media", media::public_routes(app_state.clone()))
+        .nest(
+            "/clippings",
+            clippings::public_routes(app_state.clone()),
+        )
+        .nest_api_service("/docs", public_docs(app_state.clone()))
+        .finish_api_with(&mut public_api, public_api_docs)
+        .layer(Extension(Arc::new(public_api)));
+
+    // TODO: set up rate limiting, cors, etc.
+    let app = ApiRouter::new()
+        .merge(admin)
+        .merge(public)
+        .layer(tower_http::trace::TraceLayer::new_for_http())
+        .route("/health", get(health_check).with_state(app_state.clone()));
+
+    let address: SocketAddr = "[::0]:8000".parse()?;
     info!("Listening on {}", address);
 
     axum::Server::bind(&address)

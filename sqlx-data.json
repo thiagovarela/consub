@@ -168,6 +168,56 @@
     },
     "query": "\n        INSERT INTO accounts.account_keys (account_id, keypair)\n        VALUES ($1, $2)\n        RETURNING id, account_id, keypair, expires_at\n        "
   },
+  "19397ab1713ea20983915245123961f829d7337be3ea569d776caa88d43640ff": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "size",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "path",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT * FROM media.images_set\n        WHERE image_id = $1\n        "
+  },
   "1c9b0f959e4dbff389934380225a0c3e7bff759dab2ae78db0e6ef07c516e59d": {
     "describe": {
       "columns": [
@@ -257,6 +307,110 @@
       }
     },
     "query": "\n        SELECT * FROM clippings.categories\n        WHERE id = $1 \n        AND account_id = $2\n        "
+  },
+  "2d5893179af2f2346e5fc02a6eef30e5c468557181eb076b293ce9268f71b629": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "size",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "path",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Int8",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        WITH images as (\n            SELECT id FROM media.images\n            WHERE account_id = $1            \n            AND ($3::text IS NULL OR id > $3::uuid)\n            AND (array_length($5::uuid[], 1) IS NULL OR id IN (SELECT UNNEST($5::uuid[])))  \n            ORDER BY id LIMIT $4\n        ) SELECT * from media.images_set\n            WHERE image_id in (SELECT id FROM images)\n            AND ($2::text IS NULL OR size = $2::text)       \n            ORDER BY image_id DESC\n        "
+  },
+  "3e245b4a4be6ca8283362d0469e07a63bfa92e29771708d71d782a65d32c5a5f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "origin",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT id, name, subdomain, origin,\n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        FROM accounts.accounts\n        WHERE id = (\n            SELECT account_id\n            FROM accounts.account_keys\n            WHERE id = $1 and (expires_at is null or expires_at > now())\n        )\n        "
   },
   "47b6b49eb94343fc51987dc5940e24ea95153d250a37b120aac255a41d2d0be4": {
     "describe": {
@@ -448,7 +602,7 @@
     },
     "query": "SELECT *\n        FROM clippings.items\n        WHERE account_id = $1 AND published_at IS NOT NULL\n        AND ($2::text IS NULL OR locale = $2)\n        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))        \n        AND ($4::text IS NULL OR slug = $4)\n        AND ($5::text IS NULL OR id < $5::uuid)\n        ORDER BY published_at, id LIMIT $6\n        "
   },
-  "4d7a2acf4430fcb8b66893027c42c683306fe9d733de079b10d34745eb2f2146": {
+  "5248445e57bc4c1b726d6d1909afa0bc620a8e2f7747524e3973b7fc80cfe793": {
     "describe": {
       "columns": [
         {
@@ -457,23 +611,88 @@
           "type_info": "Uuid"
         },
         {
-          "name": "name",
+          "name": "account_id",
           "ordinal": 1,
-          "type_info": "Varchar"
+          "type_info": "Uuid"
         },
         {
-          "name": "subdomain",
+          "name": "author_id",
           "ordinal": 2,
-          "type_info": "Varchar"
+          "type_info": "Uuid"
         },
         {
-          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
+          "name": "title",
           "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_json",
+          "ordinal": 5,
           "type_info": "Jsonb"
         },
         {
+          "name": "body_html",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_text",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_featured",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_title",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_description",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_keywords",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 14,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 16,
+          "type_info": "Timestamp"
+        },
+        {
           "name": "updated_at",
-          "ordinal": 4,
+          "ordinal": 17,
           "type_info": "Timestamp"
         }
       ],
@@ -482,15 +701,29 @@
         false,
         false,
         false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
         false
       ],
       "parameters": {
         "Left": [
+          "Uuid",
           "Uuid"
         ]
       }
     },
-    "query": "\n        SELECT id, name, subdomain,\n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        FROM accounts.accounts\n        WHERE id = (\n            SELECT account_id\n            FROM accounts.account_keys\n            WHERE id = $1 and (expires_at is null or expires_at > now())\n        )\n        "
+    "query": "\n        SELECT id, account_id, author_id, title, slug, body_json, body_html, body_text, locale, is_featured,\n        short_description, meta_title, meta_description, meta_keywords,\n        category_id, \n        translation_of, published_at,\n        updated_at\n        FROM blogs.posts\n        WHERE account_id = $1 AND id = $2\n        "
   },
   "57c7a12a9887d005063297f9ab89ec3a356b1f58611d3414ff5691187baff03b": {
     "describe": {
@@ -615,6 +848,292 @@
       }
     },
     "query": "\n        INSERT INTO accounts.passwords (user_id, hash_password)\n        VALUES ($1, $2)\n        "
+  },
+  "63b8a991b0020b91c1603bd6a29f10c0ebba7b4a836b71a35ec5709dba96f47b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_json",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "body_html",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_text",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_featured",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_title",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_description",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_keywords",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 14,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 16,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 17,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text",
+          "Jsonb",
+          "Text",
+          "Text",
+          "Varchar",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO blogs.posts (\n            account_id, author_id, title, slug, body_json, body_html, body_text, locale, is_featured,\n            short_description, meta_title, meta_description, meta_keywords,       \n            category_id,\n            translation_of, published_at                \n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)\n        RETURNING id, account_id, author_id, title, slug, body_json, body_html, body_text, locale, is_featured,\n        short_description, meta_title, meta_description, meta_keywords,\n        category_id, translation_of, published_at, updated_at\n        "
+  },
+  "64f07aeed66a2b029ec23c32eb4aa3390cdd1eb102d46f0dd032f5cf9b3bf9b4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "origin",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        SELECT id, name, subdomain, origin,\n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        FROM accounts.accounts\n        WHERE subdomain = $1\n        "
+  },
+  "659ab6fa1093878f16edb2856b6a6755ef911781db2d57accaaf71e14c792670": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "alt",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "caption",
+          "ordinal": 5,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        UPDATE media.images\n        SET alt = COALESCE($3, alt),\n            caption = COALESCE($4, caption)            \n        WHERE account_id = $1 AND id = $2\n        RETURNING *\n        "
+  },
+  "826deb9e3c7719b8191b27b43eb7acdcea2d7d3920c575e0c4cb3ea8a1a97a5f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "post_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_type",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "media_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar"
+        ]
+      }
+    },
+    "query": "\n        UPDATE blogs.post_images\n        SET image_type = COALESCE($3, image_type)\n        FROM blogs.posts \n        WHERE blogs.post_images.post_id = $1\n        AND blogs.posts.id = blogs.post_images.post_id\n        AND blogs.posts.account_id = $2\n        RETURNING blogs.post_images.*\n        "
   },
   "82b8a82cb096d820d6bd04c306c5eb736385e806d8a78b4c93d73771347aa2f9": {
     "describe": {
@@ -760,164 +1279,6 @@
     },
     "query": "\n        UPDATE clippings.items\n        SET title = COALESCE($3, title),\n            slug = COALESCE($4, slug),\n            locale = COALESCE($5, locale),\n            body_json = COALESCE($6, body_json),\n            is_featured = COALESCE($7, is_featured),\n            short_description = COALESCE($8, short_description),\n            source = COALESCE($9, source),\n            source_url = COALESCE($10, source_url),\n            source_published_at = COALESCE($11, source_published_at),            \n            category_id = COALESCE($12, category_id),\n            reading_time_minutes = COALESCE($13, reading_time_minutes),                        \n            published_at = $14,\n            tags = COALESCE($15, tags),\n            body_html = COALESCE($16, body_html),\n            body_text = COALESCE($17, body_text)\n        WHERE id = $1\n          AND account_id = $2\n        RETURNING *\n        "
   },
-  "847a78bc262ba0946f3f4359c920d2a7002265ec59463719d239ab6fd3c7626c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "account_id",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "title",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "slug",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "short_description",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "keywords",
-          "ordinal": 6,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "body",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "locale",
-          "ordinal": 8,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "category_id",
-          "ordinal": 9,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "is_featured",
-          "ordinal": 10,
-          "type_info": "Bool"
-        },
-        {
-          "name": "reading_time_minutes",
-          "ordinal": 11,
-          "type_info": "Int4"
-        },
-        {
-          "name": "translation_of",
-          "ordinal": 12,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "featured_image",
-          "ordinal": 13,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_alt",
-          "ordinal": 14,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_caption",
-          "ordinal": 15,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_title",
-          "ordinal": 16,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_description",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_image",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 19,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 20,
-          "type_info": "Timestamp"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        true,
-        false,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Text",
-          "Text",
-          "Varchar",
-          "Jsonb",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Uuid",
-          "Int4",
-          "Uuid",
-          "Timestamp",
-          "TextArray",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      }
-    },
-    "query": "\n        UPDATE blogs.posts\n        SET title = COALESCE($3, title),\n            slug = COALESCE($4, slug),\n            locale = COALESCE($5, locale),\n            body = COALESCE($6, body),\n            is_featured = COALESCE($7, is_featured),\n            short_description = COALESCE($8, short_description),\n            featured_image = COALESCE($9, featured_image),\n            featured_image_alt = COALESCE($10, featured_image_alt),\n            featured_image_caption = COALESCE($11, featured_image_caption),\n            category_id = COALESCE($12, category_id),\n            reading_time_minutes = COALESCE($13, reading_time_minutes),            \n            translation_of = COALESCE($14, translation_of),\n            published_at = COALESCE($15, published_at),\n            keywords = COALESCE($16, keywords),\n            og_title = COALESCE($17, og_title),\n            og_description = COALESCE($18, og_description),\n            og_image = COALESCE($19, og_image)\n        WHERE id = $1 \n            AND account_id = $2\n        RETURNING *\n        "
-  },
   "87bda27d191a288853cae2fb3681bcf81f5bf23a58bd621d56ae4f3d4dc21e64": {
     "describe": {
       "columns": [
@@ -1050,7 +1411,7 @@
     },
     "query": "SELECT *\n        FROM clippings.items\n        WHERE account_id = $1 \n        AND ($2::text IS NULL OR locale = $2)\n        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))  \n        AND ($4::text IS NULL OR id < $4::uuid)\n        ORDER BY id LIMIT $5\n        "
   },
-  "8bdaee1e68bf01a4cafc0d9e3f3aff3574bafb5df88e44f08a56ac2c4d40b01c": {
+  "969eabc109e96e4a4f183a60b0d873b0872fd291bfebbd242e24c9a26d72c447": {
     "describe": {
       "columns": [
         {
@@ -1059,24 +1420,29 @@
           "type_info": "Uuid"
         },
         {
-          "name": "name",
+          "name": "account_id",
           "ordinal": 1,
-          "type_info": "Varchar"
+          "type_info": "Uuid"
         },
         {
-          "name": "subdomain",
+          "name": "created_at",
           "ordinal": 2,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
-          "ordinal": 3,
-          "type_info": "Jsonb"
+          "type_info": "Timestamp"
         },
         {
           "name": "updated_at",
-          "ordinal": 4,
+          "ordinal": 3,
           "type_info": "Timestamp"
+        },
+        {
+          "name": "alt",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "caption",
+          "ordinal": 5,
+          "type_info": "Text"
         }
       ],
       "nullable": [
@@ -1084,18 +1450,19 @@
         false,
         false,
         false,
-        false
+        true,
+        true
       ],
       "parameters": {
         "Left": [
-          "Varchar",
-          "Varchar"
+          "Uuid",
+          "Uuid"
         ]
       }
     },
-    "query": "\n        INSERT INTO accounts.accounts (name, subdomain)\n        VALUES ($1, $2)\n        RETURNING id, name, subdomain, \n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        "
+    "query": "\n        INSERT INTO media.images (id, account_id)\n        VALUES ($1, $2)\n        RETURNING *\n        "
   },
-  "97537720d198c889c0feb9b03b8ad6876f8fbfa7a4f6dbc35fd09b22d1ce1f65": {
+  "9789ee1aa88dda2fed18b542149d96ebd19eb0a080890ec15cdc319244a5450c": {
     "describe": {
       "columns": [
         {
@@ -1104,24 +1471,29 @@
           "type_info": "Uuid"
         },
         {
-          "name": "name",
+          "name": "account_id",
           "ordinal": 1,
-          "type_info": "Varchar"
+          "type_info": "Uuid"
         },
         {
-          "name": "subdomain",
+          "name": "created_at",
           "ordinal": 2,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
-          "ordinal": 3,
-          "type_info": "Jsonb"
+          "type_info": "Timestamp"
         },
         {
           "name": "updated_at",
-          "ordinal": 4,
+          "ordinal": 3,
           "type_info": "Timestamp"
+        },
+        {
+          "name": "alt",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "caption",
+          "ordinal": 5,
+          "type_info": "Text"
         }
       ],
       "nullable": [
@@ -1129,15 +1501,17 @@
         false,
         false,
         false,
-        false
+        true,
+        true
       ],
       "parameters": {
         "Left": [
-          "Text"
+          "Uuid",
+          "Uuid"
         ]
       }
     },
-    "query": "\n        SELECT id, name, subdomain, \n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        FROM accounts.accounts\n        WHERE subdomain = $1\n        "
+    "query": "\n        SELECT * FROM media.images\n        WHERE account_id = $1 AND id = $2\n        "
   },
   "a025c17f9710106572842167221a9cdb7f915ea1c1cfe706782129f6b958f494": {
     "describe": {
@@ -1254,6 +1628,51 @@
     },
     "query": "\n        UPDATE clippings.categories\n        SET name = COALESCE($3, name),\n            slug = COALESCE($4, slug),\n            locale = COALESCE($5, locale)\n        WHERE id = $1 \n            AND account_id = $2\n        RETURNING *\n        "
   },
+  "abf51fa919e2e8776cec441ab96329adaef32161f936358511f4ab0957df5240": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "post_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_type",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "media_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        SELECT pi.* FROM blogs.post_images pi\n        INNER JOIN blogs.posts p ON p.id = pi.post_id\n        WHERE p.account_id = $1 \n        AND p.id = ANY($2)          \n        "
+  },
   "abf961145c32c5408b4a00a03242aa75674325f49ff702ccd6079a133900beff": {
     "describe": {
       "columns": [
@@ -1307,6 +1726,52 @@
     },
     "query": "\n        INSERT INTO clippings.categories (account_id, name, slug, locale)\n        VALUES ($1, $2, $3, $4)\n        RETURNING *\n        "
   },
+  "b58a1ca6f973a5a45db773b2807dd39cd5021145a10974e05e1dcda8948dd129": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "post_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_type",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "media_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO blogs.post_images (post_id, image_type, media_id)\n        VALUES ($1, $2, $3)\n        RETURNING *\n        "
+  },
   "b5b9704c678dfb14e285f59bb590710746fca112349f0af51a9f472b1e89f470": {
     "describe": {
       "columns": [
@@ -1339,6 +1804,316 @@
       }
     },
     "query": "\n        SELECT u.id as user_id, u.account_id, p.hash_password\n        FROM accounts.passwords p\n        INNER JOIN accounts.users u ON (u.id = p.user_id)\n        WHERE u.email = $1 and u.account_id = $2\n        "
+  },
+  "b67c16838a5d19bb0abf481f17d8794692a07b3863e5dea51473487350f9dbc9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "post_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "image_type",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "media_id",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 4,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n        SELECT pi.* FROM blogs.post_images pi\n        INNER JOIN blogs.posts p ON p.id = pi.post_id\n        WHERE p.account_id = $1 \n        AND p.id = $2          \n        "
+  },
+  "bceb1a49f0f0df11848443d49023f9883faece3322b09dae45845acd5994f103": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_json",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "body_html",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_text",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_featured",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_title",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_description",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_keywords",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 14,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 16,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 17,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "UuidArray",
+          "Text",
+          "Text",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n        SELECT bp.id, bp.account_id, bp.author_id, bp.title, bp.slug, bp.body_json, bp.body_html, bp.body_text, bp.locale, bp.is_featured,\n        bp.short_description, bp.meta_title, bp.meta_description, bp.meta_keywords,\n        bp.category_id, bp.translation_of, bp.published_at, bp.updated_at \n        FROM blogs.posts bp\n        LEFT OUTER JOIN blogs.categories bc ON bc.id = bp.category_id\n        WHERE bp.account_id = $1 \n        AND ($2::text IS NULL OR bp.slug = $2)\n        AND ($3::text IS NULL OR bp.locale = $3)\n        AND (array_length($4::uuid[], 1) IS NULL OR bp.category_id IN (SELECT UNNEST($4::uuid[])))\n        AND ($5::text IS NULL OR bc.slug = $5)\n        AND bp.published_at IS NOT NULL and bp.published_at <= NOW()\n        AND ($6::text IS NULL OR bp.id > $6::uuid)\n        ORDER BY bp.published_at DESC, bp.id DESC\n        LIMIT $7\n        "
+  },
+  "c850f6a5628404efee12ae6724fe0eb333e4e11f18d0c23f3cc0ec0aae9c8e85": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_json",
+          "ordinal": 6,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "body_html",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_text",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 9,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 10,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_featured",
+          "ordinal": 11,
+          "type_info": "Bool"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 12,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 13,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 14,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "meta_title",
+          "ordinal": 15,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_description",
+          "ordinal": 16,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_keywords",
+          "ordinal": 17,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Text",
+          "Text",
+          "Varchar",
+          "Jsonb",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Uuid",
+          "Uuid",
+          "Timestamp"
+        ]
+      }
+    },
+    "query": "\n        UPDATE blogs.posts\n        SET title = COALESCE($3, title),\n            slug = COALESCE($4, slug),\n            locale = COALESCE($5, locale),\n            body_json = COALESCE($6, body_json),\n            body_html = COALESCE($7, body_html),\n            body_text = COALESCE($8, body_text),\n            is_featured = COALESCE($9, is_featured),\n            short_description = COALESCE($10, short_description),\n            meta_title = COALESCE($11, meta_title),\n            meta_description = COALESCE($12, meta_description),\n            meta_keywords = COALESCE($13, meta_keywords),\n            category_id = COALESCE($14, category_id),            \n            translation_of = COALESCE($15, translation_of),\n            published_at = COALESCE($16, published_at)            \n        WHERE id = $1 \n            AND account_id = $2\n        RETURNING *\n        "
   },
   "caca16f86c8a15c10e6cc8535b96156699dbae72387416560f7aaca48fb9ac66": {
     "describe": {
@@ -1635,7 +2410,7 @@
     },
     "query": "\n        SELECT * FROM clippings.categories\n        WHERE account_id = $1\n        AND ($2::text IS NULL OR name ~* $2)\n        AND ($3::text IS NULL OR locale = $3)        \n        AND ($5::text IS NULL OR id > $5::uuid)\n        ORDER BY id LIMIT $4\n        "
   },
-  "e0a16e8a0368faa62817aa07c53d070580df34590bd5ff28a34045a5cb59ac71": {
+  "dc9bc79edd44df242f919fa5ef2e124cdb50fcdd1564073c4d5a51b8cb21ef73": {
     "describe": {
       "columns": [
         {
@@ -1644,103 +2419,33 @@
           "type_info": "Uuid"
         },
         {
-          "name": "account_id",
+          "name": "name",
           "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "title",
-          "ordinal": 3,
           "type_info": "Text"
         },
         {
           "name": "slug",
-          "ordinal": 4,
+          "ordinal": 2,
           "type_info": "Text"
-        },
-        {
-          "name": "body",
-          "ordinal": 5,
-          "type_info": "Jsonb"
         },
         {
           "name": "locale",
-          "ordinal": 6,
+          "ordinal": 3,
           "type_info": "Varchar"
         },
         {
-          "name": "is_featured",
-          "ordinal": 7,
-          "type_info": "Bool"
-        },
-        {
-          "name": "short_description",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_alt",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_caption",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "category_id",
-          "ordinal": 12,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "reading_time_minutes",
-          "ordinal": 13,
-          "type_info": "Int4"
-        },
-        {
           "name": "translation_of",
-          "ordinal": 14,
+          "ordinal": 4,
           "type_info": "Uuid"
         },
         {
-          "name": "published_at",
-          "ordinal": 15,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "keywords",
-          "ordinal": 16,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "og_title",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_description",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_image",
-          "ordinal": 19,
-          "type_info": "Text"
+          "name": "account_id",
+          "ordinal": 5,
+          "type_info": "Uuid"
         },
         {
           "name": "updated_at",
-          "ordinal": 20,
+          "ordinal": 6,
           "type_info": "Timestamp"
         }
       ],
@@ -1749,32 +2454,18 @@
         false,
         false,
         false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
         true,
         false,
-        true,
-        true,
-        true,
         false
       ],
       "parameters": {
         "Left": [
-          "Uuid",
+          "UuidArray",
           "Uuid"
         ]
       }
     },
-    "query": "\n        SELECT id, account_id, author_id, title, slug, body, locale, is_featured,\n        short_description, featured_image, featured_image_alt, featured_image_caption,\n        category_id, reading_time_minutes,\n        translation_of, published_at,\n        keywords, og_title, og_description, og_image, updated_at\n        FROM blogs.posts\n        WHERE account_id = $1 AND id = $2\n        "
+    "query": "\n        SELECT * FROM blogs.categories\n        WHERE id = ANY($1) \n        AND account_id = $2\n        "
   },
   "e73cb9325ac09c44b25dfd048028443cc2a254d8ef016ca2f1a00e5eaf2f6ff9": {
     "describe": {
@@ -1871,7 +2562,7 @@
     },
     "query": "\n        DELETE FROM blogs.categories\n        WHERE id = $1 \n        AND account_id = $2\n        RETURNING *\n        "
   },
-  "f18476d12e06d3ee53353325f31815278a53d9ec0668dda01c3e25da74a0d75e": {
+  "f268ad6c24aabe62813eb7b9ba57d2934705847e6c695bfffa5531bdf6be0aae": {
     "describe": {
       "columns": [
         {
@@ -1880,103 +2571,28 @@
           "type_info": "Uuid"
         },
         {
-          "name": "account_id",
+          "name": "image_id",
           "ordinal": 1,
           "type_info": "Uuid"
         },
         {
-          "name": "author_id",
+          "name": "size",
           "ordinal": 2,
-          "type_info": "Uuid"
+          "type_info": "Text"
         },
         {
-          "name": "title",
+          "name": "path",
           "ordinal": 3,
           "type_info": "Text"
         },
         {
-          "name": "slug",
+          "name": "created_at",
           "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "body",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "locale",
-          "ordinal": 6,
-          "type_info": "Varchar"
-        },
-        {
-          "name": "is_featured",
-          "ordinal": 7,
-          "type_info": "Bool"
-        },
-        {
-          "name": "short_description",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_alt",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_caption",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "category_id",
-          "ordinal": 12,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "reading_time_minutes",
-          "ordinal": 13,
-          "type_info": "Int4"
-        },
-        {
-          "name": "translation_of",
-          "ordinal": 14,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 15,
           "type_info": "Timestamp"
         },
         {
-          "name": "keywords",
-          "ordinal": 16,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "og_title",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_description",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_image",
-          "ordinal": 19,
-          "type_info": "Text"
-        },
-        {
           "name": "updated_at",
-          "ordinal": 20,
+          "ordinal": 5,
           "type_info": "Timestamp"
         }
       ],
@@ -1986,50 +2602,19 @@
         false,
         false,
         false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        false,
-        true,
-        true,
-        true,
         false
       ],
       "parameters": {
         "Left": [
           "Uuid",
-          "Uuid",
-          "Text",
-          "Text",
-          "Jsonb",
-          "Varchar",
-          "Bool",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Uuid",
-          "Int4",
-          "Uuid",
-          "Timestamp",
-          "TextArray",
-          "Text",
           "Text",
           "Text"
         ]
       }
     },
-    "query": "\n        INSERT INTO blogs.posts (\n            account_id, author_id, title, slug, body, locale, is_featured,\n            short_description, featured_image, featured_image_alt, featured_image_caption,\n            category_id, reading_time_minutes,\n            translation_of, published_at,\n            keywords, og_title, og_description, og_image            \n        )\n        VALUES ($1, $2, $3, $4, $5,\n             $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)\n        RETURNING id, account_id, author_id, title, slug, body, locale, is_featured,\n        short_description, featured_image, featured_image_alt, featured_image_caption,\n        category_id, reading_time_minutes,\n        translation_of, published_at,\n        keywords, og_title, og_description, og_image, updated_at\n        "
+    "query": "\n        INSERT INTO media.images_set (image_id, size, path)\n        VALUES ($1, $2, $3)\n        RETURNING *\n        "
   },
-  "f4e56f56b44d066c3449f0a790cc7be3f5b0c71acd0e412c7ce7fda72be3b2ff": {
+  "f60dfaf9102ab4a6e6ceea62fc6e7cbe2220169d010c969cbdda3561afb724da": {
     "describe": {
       "columns": [
         {
@@ -2038,103 +2623,23 @@
           "type_info": "Uuid"
         },
         {
-          "name": "account_id",
+          "name": "post_id",
           "ordinal": 1,
           "type_info": "Uuid"
         },
         {
-          "name": "author_id",
+          "name": "image_type",
           "ordinal": 2,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "title",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "slug",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "body",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "locale",
-          "ordinal": 6,
           "type_info": "Varchar"
         },
         {
-          "name": "is_featured",
-          "ordinal": 7,
-          "type_info": "Bool"
-        },
-        {
-          "name": "short_description",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image",
-          "ordinal": 9,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_alt",
-          "ordinal": 10,
-          "type_info": "Text"
-        },
-        {
-          "name": "featured_image_caption",
-          "ordinal": 11,
-          "type_info": "Text"
-        },
-        {
-          "name": "category_id",
-          "ordinal": 12,
+          "name": "media_id",
+          "ordinal": 3,
           "type_info": "Uuid"
-        },
-        {
-          "name": "reading_time_minutes",
-          "ordinal": 13,
-          "type_info": "Int4"
-        },
-        {
-          "name": "translation_of",
-          "ordinal": 14,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 15,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "keywords",
-          "ordinal": 16,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "og_title",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_description",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "og_image",
-          "ordinal": 19,
-          "type_info": "Text"
         },
         {
           "name": "updated_at",
-          "ordinal": 20,
+          "ordinal": 4,
           "type_info": "Timestamp"
         }
       ],
@@ -2143,33 +2648,16 @@
         false,
         false,
         false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        false,
-        true,
-        true,
-        true,
         false
       ],
       "parameters": {
         "Left": [
           "Uuid",
-          "Text",
-          "UuidArray"
+          "Uuid"
         ]
       }
     },
-    "query": "\n        SELECT id, account_id, author_id, title, slug, body, locale, is_featured,\n        short_description, featured_image, featured_image_alt, featured_image_caption,\n        category_id, reading_time_minutes,\n        translation_of, published_at,\n        keywords, og_title, og_description, og_image, updated_at FROM blogs.posts\n        WHERE account_id = $1 \n        AND ($2::text IS NULL OR locale = $2)\n        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))\n        "
+    "query": "\n        DELETE FROM blogs.post_images\n        USING blogs.posts\n        WHERE blogs.post_images.id = $1\n        AND blogs.post_images.post_id = blogs.posts.id        \n        AND blogs.posts.account_id = $2\n        RETURNING blogs.post_images.*\n        "
   },
   "f7ed3bf09d1c265af75028572b3efa7a34c2aaff77a6172fd2943bcaf10e7f84": {
     "describe": {
@@ -2208,6 +2696,182 @@
       }
     },
     "query": "\n        SELECT id, account_id, keypair, expires_at\n        FROM accounts.account_keys\n        WHERE account_id = $1\n        ORDER BY expires_at DESC\n        "
+  },
+  "f9aa753ea8939dd6eaf6631ed3cd7f8a2abcdd4491577fda7fdad82938d7284d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "subdomain",
+          "ordinal": 2,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "origin",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "feature_flags!: sqlx::types::Json<AccountFeatureFlags>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 5,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO accounts.accounts (name, subdomain, origin)\n        VALUES ($1, $2, $3)\n        RETURNING id, name, subdomain, origin, \n        feature_flags as \"feature_flags!: sqlx::types::Json<AccountFeatureFlags>\",\n        updated_at\n        "
+  },
+  "f9b7f36a3d83473fb761d0373d7cdcb2a0822aae7bc7bc378d83efcc714a6168": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "account_id",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 2,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "title",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "slug",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_json",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "body_html",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "body_text",
+          "ordinal": 7,
+          "type_info": "Text"
+        },
+        {
+          "name": "locale",
+          "ordinal": 8,
+          "type_info": "Varchar"
+        },
+        {
+          "name": "is_featured",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "short_description",
+          "ordinal": 10,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_title",
+          "ordinal": 11,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_description",
+          "ordinal": 12,
+          "type_info": "Text"
+        },
+        {
+          "name": "meta_keywords",
+          "ordinal": 13,
+          "type_info": "Text"
+        },
+        {
+          "name": "category_id",
+          "ordinal": 14,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "translation_of",
+          "ordinal": 15,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 16,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 17,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\n        SELECT id, account_id, author_id, title, slug, body_json, body_html, body_text, locale, is_featured,\n        short_description, meta_title, meta_description, meta_keywords,\n        category_id,\n        translation_of, published_at,\n        updated_at FROM blogs.posts\n        WHERE account_id = $1 \n        AND ($2::text IS NULL OR locale = $2)\n        AND (array_length($3::uuid[], 1) IS NULL OR category_id IN (SELECT UNNEST($3::uuid[])))\n        "
   },
   "fa39e0188bcb7baac3af3fece5fafdbcb5b3cf9d2056fa745d26033043a0dbb3": {
     "describe": {

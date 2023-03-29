@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { srcset } from '$lib/images';
+	import type { ImageResponse } from '$lib/api';
 	import BasePage from '$lib/ui/BasePage.svelte';
+	import ImageSet from '$lib/ui/images/ImageSet.svelte';
 	import MediaUpload from '$lib/ui/MediaUpload.svelte';
+	import Modal from '$lib/ui/Modal.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
 	let imageUploadModal = false;
+	let imageModal = false;
+	let selectedImage: ImageResponse | undefined;
 </script>
 
 <BasePage>
@@ -21,17 +25,29 @@
 		</button>
 	</span>
 	<span slot="main">
-		<div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-6 gap-4">
 			{#each data.images as image}
-				<div>
-					<img
-						class="h-auto max-h-44 max-w-44 rounded-lg"
-						loading="lazy"
-						srcset={srcset(image)}
-						alt="" />
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<div
+					data-id={image.id}
+					on:click={({ currentTarget: { dataset } }) => {
+						selectedImage = data.images.find((i) => i.id === dataset.id);
+						imageModal = true;
+					}}>
+					<ImageSet
+						class="h-auto md:max-h-44 md:max-w-44 rounded-lg"
+						imageSet={image.image_set} />
 				</div>
 			{/each}
 		</div>
 	</span>
 </BasePage>
 <MediaUpload bind:show={imageUploadModal} />
+
+{#if imageModal && selectedImage}
+	<Modal bind:show={imageModal}>
+		<span slot="header"><h1>Image</h1></span>
+		{''}
+		<ImageSet class="h-auto rounded-lg" imageSet={selectedImage.image_set} />
+	</Modal>
+{/if}

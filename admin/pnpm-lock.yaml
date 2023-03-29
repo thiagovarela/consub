@@ -8,17 +8,23 @@ specifiers:
   '@tailwindcss/forms': ^0.5.3
   '@tailwindcss/typography': ^0.5.9
   '@tiptap/core': 2.0.0-beta.212
+  '@tiptap/extension-bubble-menu': 2.0.0-beta.220
   '@tiptap/extension-character-count': 2.0.0-beta.217
   '@tiptap/extension-dropcursor': 2.0.0-beta.220
+  '@tiptap/extension-image': 2.0.0-beta.220
   '@tiptap/extension-link': 2.0.0-beta.217
+  '@tiptap/extension-placeholder': 2.0.0-beta.220
   '@tiptap/html': 2.0.0-beta.220
   '@tiptap/pm': 2.0.0-beta.212
   '@tiptap/starter-kit': 2.0.0-beta.212
+  '@types/blueimp-load-image': ^5.16.0
   '@typescript-eslint/eslint-plugin': ^5.55.0
   '@typescript-eslint/parser': ^5.55.0
   accept-language-parser: ^1.5.0
   autoprefixer: ^10.4.14
   axios: ^1.3.4
+  blueimp-load-image: ^5.16.0
+  date-picker-svelte: ^2.3.0
   dayjs: ^1.11.7
   eslint: ^8.36.0
   eslint-config-prettier: ^8.7.0
@@ -41,14 +47,19 @@ specifiers:
 
 dependencies:
   '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
+  '@tiptap/extension-bubble-menu': 2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla
   '@tiptap/extension-character-count': 2.0.0-beta.217_zgjcuhkx73ahmrjtl4wwrfvmla
   '@tiptap/extension-dropcursor': 2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla
+  '@tiptap/extension-image': 2.0.0-beta.220_fpm27c2ijcgoxttu7rbz5hnmva
   '@tiptap/extension-link': 2.0.0-beta.217_zgjcuhkx73ahmrjtl4wwrfvmla
+  '@tiptap/extension-placeholder': 2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla
   '@tiptap/html': 2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla
   '@tiptap/pm': 2.0.0-beta.212_fpm27c2ijcgoxttu7rbz5hnmva
   '@tiptap/starter-kit': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
   accept-language-parser: 1.5.0
   axios: 1.3.4
+  blueimp-load-image: 5.16.0
+  date-picker-svelte: 2.3.0_svelte@3.57.0
   dayjs: 1.11.7
   form-data: 4.0.0
   svelecte: 4.0.0-alpha.7
@@ -62,6 +73,7 @@ devDependencies:
   '@sveltejs/kit': 1.12.0_svelte@3.57.0+vite@4.2.0
   '@tailwindcss/forms': 0.5.3_tailwindcss@3.2.7
   '@tailwindcss/typography': 0.5.9_tailwindcss@3.2.7
+  '@types/blueimp-load-image': 5.16.0
   '@typescript-eslint/eslint-plugin': 5.55.0_342y7v4tc7ytrrysmit6jo4wri
   '@typescript-eslint/parser': 5.55.0_vgl77cfdswitgr47lm5swmv43m
   autoprefixer: 10.4.14_postcss@8.4.21
@@ -426,6 +438,10 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
+  /@popperjs/core/2.11.6:
+    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
+    dev: false
+
   /@remirror/core-constants/2.0.0:
     resolution: {integrity: sha512-vpePPMecHJllBqCWXl6+FIcZqS+tRUM2kSCCKFeEo1H3XUEv3ocijBIPhnlSAa7g6maX+12ATTgxrOsLpWVr2g==}
     dependencies:
@@ -635,6 +651,18 @@ packages:
       '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
     dev: false
 
+  /@tiptap/extension-bubble-menu/2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla:
+    resolution: {integrity: sha512-wthyec7s0vZlTSEAAZEgoFfx/1Arwg1zxDUrrE+YAost/Yn+w4xQksz/ts5Bx90iOk2qsJ+jzzttLRV17Ku7lA==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0-beta.209
+      '@tiptap/pm': ^2.0.0-beta.209
+    dependencies:
+      '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
+      '@tiptap/pm': 2.0.0-beta.212_fpm27c2ijcgoxttu7rbz5hnmva
+      lodash: 4.17.21
+      tippy.js: 6.3.7
+    dev: false
+
   /@tiptap/extension-bullet-list/2.0.0-beta.220_fpm27c2ijcgoxttu7rbz5hnmva:
     resolution: {integrity: sha512-QQ/0ZlYy6Hgb+UAc79V+fxvI+AaQf20cbKtBXaR8TIZ0x4FotSma89bKh+CIXMhFiBGXTcYBaYhl7OwACsKtxw==}
     peerDependencies:
@@ -735,6 +763,14 @@ packages:
       '@tiptap/pm': 2.0.0-beta.212_fpm27c2ijcgoxttu7rbz5hnmva
     dev: false
 
+  /@tiptap/extension-image/2.0.0-beta.220_fpm27c2ijcgoxttu7rbz5hnmva:
+    resolution: {integrity: sha512-xyzlY/cupj/7AVqybQDaPaJ3SwKqe12xMWQlWxhhksuNpbQ6RGHrJz0DBSe61kIkaTZmIUBw055IFEMOPFF53g==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0-beta.209
+    dependencies:
+      '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
+    dev: false
+
   /@tiptap/extension-italic/2.0.0-beta.220_fpm27c2ijcgoxttu7rbz5hnmva:
     resolution: {integrity: sha512-aWAgqoR8fql9fJ7T/ZrEqovkEjZXbUpvlvWEvdBDMG3id8ZTGNDpdDKdvI6J/Rl5ZGPIg1TpHJtd+UixheWQsQ==}
     peerDependencies:
@@ -776,6 +812,16 @@ packages:
       '@tiptap/core': ^2.0.0-beta.209
     dependencies:
       '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
+    dev: false
+
+  /@tiptap/extension-placeholder/2.0.0-beta.220_zgjcuhkx73ahmrjtl4wwrfvmla:
+    resolution: {integrity: sha512-Pq79BH/JqhjTNgxHkmbzcmwATsSJdRRSLHrnLx5upSmwEkQwCzqni9jL10rL2NM1ZyR+o25xC+r5loujx0aQ+Q==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0-beta.209
+      '@tiptap/pm': ^2.0.0-beta.209
+    dependencies:
+      '@tiptap/core': 2.0.0-beta.212_@tiptap+pm@2.0.0-beta.212
+      '@tiptap/pm': 2.0.0-beta.212_fpm27c2ijcgoxttu7rbz5hnmva
     dev: false
 
   /@tiptap/extension-strike/2.0.0-beta.220_fpm27c2ijcgoxttu7rbz5hnmva:
@@ -856,6 +902,10 @@ packages:
     transitivePeerDependencies:
       - '@tiptap/pm'
     dev: false
+
+  /@types/blueimp-load-image/5.16.0:
+    resolution: {integrity: sha512-Q2t0/xly180IV7Ybu5pGk9MC/lrnqPZtplLh3R5T0i2tnE8Nt20gtjkLtliCD/gAlQHHScrjmP607ee++FAgpg==}
+    dev: true
 
   /@types/cookie/0.5.1:
     resolution: {integrity: sha512-COUnqfB2+ckwXXSFInsFdOAWQzCCx+a5hq2ruyj+Vjund94RJQd4LG2u9hnvJrTgunKAaax7ancBYlDrNYxA0g==}
@@ -1152,6 +1202,10 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /blueimp-load-image/5.16.0:
+    resolution: {integrity: sha512-3DUSVdOtlfNRk7moRZuTwDmA3NnG8KIJuLcq3c0J7/BIr6X3Vb/EpX3kUH1joxUhmoVF4uCpDfz7wHkz8pQajA==}
+    dev: false
+
   /brace-expansion/1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
     dependencies:
@@ -1342,6 +1396,14 @@ packages:
 
   /dash-get/1.0.2:
     resolution: {integrity: sha512-4FbVrHDwfOASx7uQVxeiCTo7ggSdYZbqs8lH+WU6ViypPlDbe9y6IP5VVUDQBv9DcnyaiPT5XT0UWHgJ64zLeQ==}
+    dev: false
+
+  /date-picker-svelte/2.3.0_svelte@3.57.0:
+    resolution: {integrity: sha512-DgXlI+FHClWXxjt+EP2Tk37lu9nkxj3zYkNPLjcjiIq/SJhD0CIMmJa75wlXjuvDlpiQt75dMDvCIISTrMzcEQ==}
+    peerDependencies:
+      svelte: ^3.24.0
+    dependencies:
+      svelte: 3.57.0
     dev: false
 
   /dayjs/1.11.7:
@@ -2031,6 +2093,10 @@ packages:
   /lodash.merge/4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
+
+  /lodash/4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+    dev: false
 
   /logform/2.5.1:
     resolution: {integrity: sha512-9FyqAm9o9NKKfiAKfZoYo9bGXXuwMkxQiQttkT4YjjVtQVIQtK6LmVtlxmCaFswo6N4AfEkHqZTV0taDtPotNg==}
@@ -2903,7 +2969,6 @@ packages:
   /svelte/3.57.0:
     resolution: {integrity: sha512-WMXEvF+RtAaclw0t3bPDTUe19pplMlfyKDsixbHQYgCWi9+O9VN0kXU1OppzrB9gPAvz4NALuoca2LfW2bOjTQ==}
     engines: {node: '>= 8'}
-    dev: true
 
   /tailwindcss/3.2.7_postcss@8.4.21:
     resolution: {integrity: sha512-B6DLqJzc21x7wntlH/GsZwEXTBttVSl1FtCzC8WP4oBc/NKef7kaax5jeihkkCEWc831/5NDJ9gRNDK6NEioQQ==}
@@ -2958,6 +3023,12 @@ packages:
       globalyzer: 0.1.0
       globrex: 0.1.2
     dev: true
+
+  /tippy.js/6.3.7:
+    resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
+    dependencies:
+      '@popperjs/core': 2.11.6
+    dev: false
 
   /to-regex-range/5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}

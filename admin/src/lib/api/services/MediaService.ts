@@ -17,6 +17,7 @@ export class MediaService {
     public static listImages({
         after,
         before,
+        imageId,
         size,
         take = 100,
     }: {
@@ -28,6 +29,7 @@ export class MediaService {
          * The pagination cursor to end at.
          */
         before?: string | null,
+        imageId?: Array<string>,
         size?: string | null,
         /**
          * The number of items to return. Default is 100.
@@ -36,10 +38,11 @@ export class MediaService {
     }): CancelablePromise<Array<ImageResponse>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/media/admin/images',
+            url: '/admin/media/images',
             query: {
                 'after': after,
                 'before': before,
+                'image_id': imageId,
                 'size': size,
                 'take': take,
             },
@@ -61,7 +64,7 @@ export class MediaService {
     }): CancelablePromise<ImageResponse> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/media/admin/images',
+            url: '/admin/media/images',
             formData: formData,
             mediaType: 'multipart/form-data',
         });

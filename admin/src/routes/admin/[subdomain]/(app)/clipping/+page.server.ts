@@ -3,7 +3,9 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
 	let items = await ClippingsService.listItems({});
-	let categoriesIds: string[] = items.map((item) => item.category_id);
+	let categoriesIds: string[] = items
+		.map((item) => item.category_id)
+		.filter((id) => id !== null) as string[];
 
 	let promises = categoriesIds.map((id) => {
 		return ClippingsService.getCategoryById({ categoryId: id });

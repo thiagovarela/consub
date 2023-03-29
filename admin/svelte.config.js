@@ -8,10 +8,7 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter(),
-		paths: {
-			assets: 'https://media.consub.io'
-		}
+		adapter: adapter()
 	}
 };
 

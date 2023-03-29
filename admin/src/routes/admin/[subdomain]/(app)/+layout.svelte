@@ -35,7 +35,7 @@
 <svelte:head>
 	<title>{$page.params.subdomain} | {$page.data.pageTitle}</title>
 </svelte:head>
-<div class="min-h-full">
+<div class="min-h-screen bg-gray-100">
 	<nav class="bg-slate-800">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-16 items-center justify-between">
@@ -356,7 +356,7 @@
 			</div>
 		</div>
 	</nav>
-	<div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+	<div class="py-6 sm:px-6 lg:px-8">
 		<slot />
 	</div>
 </div>

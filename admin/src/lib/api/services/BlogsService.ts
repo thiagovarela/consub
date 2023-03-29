@@ -33,7 +33,7 @@ export class BlogsService {
     }): CancelablePromise<Array<Category>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/blogs/admin/categories',
+            url: '/admin/blogs/categories',
             query: {
                 'locale': locale,
                 'name': name,
@@ -54,7 +54,7 @@ export class BlogsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/blogs/admin/categories',
+            url: '/admin/blogs/categories',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -72,7 +72,7 @@ export class BlogsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/blogs/admin/categories/{category_id}',
+            url: '/admin/blogs/categories/{category_id}',
             path: {
                 'category_id': categoryId,
             },
@@ -87,7 +87,7 @@ export class BlogsService {
     public static deletePostCategory(): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/blogs/admin/categories/{category_id}',
+            url: '/admin/blogs/categories/{category_id}',
         });
     }
 
@@ -105,7 +105,7 @@ export class BlogsService {
     }): CancelablePromise<Category> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/blogs/admin/categories/{category_id}',
+            url: '/admin/blogs/categories/{category_id}',
             path: {
                 'category_id': categoryId,
             },
@@ -121,25 +121,31 @@ export class BlogsService {
      */
     public static listPosts({
         categoryId,
+        categorySlug,
         isFeatured,
         locale,
         publishedAt,
+        slug,
         translationOf,
     }: {
         categoryId?: Array<string>,
+        categorySlug?: string | null,
         isFeatured?: boolean | null,
         locale?: string | null,
         publishedAt?: string | null,
+        slug?: string | null,
         translationOf?: string | null,
     }): CancelablePromise<Array<Post>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/blogs/admin/posts',
+            url: '/admin/blogs/posts',
             query: {
                 'category_id': categoryId,
+                'category_slug': categorySlug,
                 'is_featured': isFeatured,
                 'locale': locale,
                 'published_at': publishedAt,
+                'slug': slug,
                 'translation_of': translationOf,
             },
         });
@@ -157,7 +163,7 @@ export class BlogsService {
     }): CancelablePromise<Post> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/blogs/admin/posts',
+            url: '/admin/blogs/posts',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -175,7 +181,7 @@ export class BlogsService {
     }): CancelablePromise<Post> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/blogs/admin/posts/{post_id}',
+            url: '/admin/blogs/posts/{post_id}',
             path: {
                 'post_id': postId,
             },
@@ -196,7 +202,7 @@ export class BlogsService {
     }): CancelablePromise<Post> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/blogs/admin/posts/{post_id}',
+            url: '/admin/blogs/posts/{post_id}',
             path: {
                 'post_id': postId,
             },
@@ -217,7 +223,7 @@ export class BlogsService {
     }): CancelablePromise<Array<PostImage>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/blogs/admin/posts/{post_id}/images',
+            url: '/admin/blogs/posts/{post_id}/images',
             path: {
                 'post_id': postId,
             },
@@ -238,7 +244,7 @@ export class BlogsService {
     }): CancelablePromise<PostImage> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/blogs/admin/posts/{post_id}/images',
+            url: '/admin/blogs/posts/{post_id}/images',
             path: {
                 'post_id': postId,
             },
@@ -249,7 +255,7 @@ export class BlogsService {
 
     /**
      * Delete post image
-     * @returns any no content
+     * @returns void
      * @throws ApiError
      */
     public static deletePostImage({
@@ -258,10 +264,10 @@ export class BlogsService {
     }: {
         postId: string,
         postImageId: string,
-    }): CancelablePromise<any> {
+    }): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'DELETE',
-            url: '/blogs/admin/posts/{post_id}/images/{post_image_id}',
+            url: '/admin/blogs/posts/{post_id}/images/{post_image_id}',
             path: {
                 'post_id': postId,
                 'post_image_id': postImageId,
@@ -285,7 +291,7 @@ export class BlogsService {
     }): CancelablePromise<PostImage> {
         return __request(OpenAPI, {
             method: 'PATCH',
-            url: '/blogs/admin/posts/{post_id}/images/{post_image_id}',
+            url: '/admin/blogs/posts/{post_id}/images/{post_image_id}',
             path: {
                 'post_id': postId,
                 'post_image_id': postImageId,

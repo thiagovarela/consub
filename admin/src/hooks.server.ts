@@ -6,8 +6,7 @@ import { logger } from '$lib/logger';
 import { OpenAPI } from '$lib/api/core/OpenAPI';
 import { env } from '$env/dynamic/private';
 
-export const handle = (async ({ event, resolve }) => {
-	const requestStart = Date.now();
+export const handle = (async ({ event, resolve }) => {	
 	let subdomain = event.params.subdomain;
 	let cookies = event.cookies;
 	OpenAPI.BASE = env.API_ENDPOINT;
@@ -26,14 +25,6 @@ export const handle = (async ({ event, resolve }) => {
 	event.locals.headerLanguage = getHeaderLanguage(event.request.headers.get('accept-language'));
 
 	const response = await resolve(event);
-
-	if (response.ok) {
-		logger.info(
-			`Request ${event.request.method} ${event.request.url} took ${
-				Date.now() - requestStart
-			}ms`
-		);
-	}
 
 	return response;
 }) satisfies Handle;

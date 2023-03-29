@@ -5,8 +5,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgConnection;
 use uuid::Uuid;
 
-use crate::error::{conflict_error, Error};
-
 use crate::passwords::hash_password;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, OperationIo)]
@@ -26,7 +24,7 @@ pub struct CreateUserWithPasswordInput {
 
 pub async fn create_user_with_password(
     conn: &mut PgConnection, input: CreateUserWithPasswordInput,
-) -> Result<User, Error> {
+) -> Result<User, anyhow::Error> {
     let user = sqlx::query_as!(
         User,
         r#"
@@ -38,8 +36,7 @@ pub async fn create_user_with_password(
         input.email.to_lowercase(),
     )
     .fetch_one(&mut *conn)
-    .await
-    .map_err(conflict_error)?;
+    .await?;
 
     sqlx::query!(
         r#"
@@ -50,14 +47,13 @@ pub async fn create_user_with_password(
         hash_password(input.password)?,
     )
     .execute(&mut *conn)
-    .await
-    .map_err(conflict_error)?;
+    .await?;
 
     Ok(user)
 }
 
-pub async fn get_user_by_id(conn: &sqlx::PgPool, id: Uuid) -> Result<User, Error> {
-    Ok(sqlx::query_as!(
+pub async fn get_user_by_id(conn: &sqlx::PgPool, id: Uuid) -> Result<User, sqlx::Error> {
+    sqlx::query_as!(
         User,
         r#"
         SELECT id, account_id, email, updated_at
@@ -67,5 +63,5 @@ pub async fn get_user_by_id(conn: &sqlx::PgPool, id: Uuid) -> Result<User, Error
         id,
     )
     .fetch_one(conn)
-    .await?)
+    .await
 }

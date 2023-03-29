@@ -5,16 +5,15 @@ use aide::transform::TransformOperation;
 use axum::extract::State;
 use axum::extract::{Path, Query};
 use axum::http::StatusCode;
-use axum::{debug_handler, middleware, Json};
+use axum::{debug_handler, Json};
 use axum_extra::extract::Query as ExtraQuery;
 use schemars::JsonSchema;
-use shared::AppState;
+use shared::{AppError, AppState};
 use sqlx::PgPool;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::categories::{Category, CategoryQuery, ChangeCategoryInput, CreateCategoryInput};
-use crate::error::Error;
 use crate::post_images::{ChangePostImageInput, CreatePostImageInput, PostImage};
 use crate::posts::{ChangePostInput, CreatePostInput, Post, PostQuery};
 
@@ -28,7 +27,7 @@ pub struct PathPost {
 #[debug_handler]
 pub async fn create_post(
     State(pool): State<PgPool>, user: User, Json(body): Json<CreatePostInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     body.validate()?;
     let mut conn = pool.acquire().await?;
     let post = crate::posts::create_post(&mut conn, user.account_id, user.id, body).await?;
@@ -46,7 +45,7 @@ pub fn create_post_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn list_posts(
     State(pool): State<PgPool>, user: User, ExtraQuery(query): ExtraQuery<PostQuery>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let posts = crate::posts::list_posts(&mut conn, user.account_id, query).await?;
     Ok((StatusCode::CREATED, Json(posts)))
@@ -63,7 +62,7 @@ pub fn list_posts_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn get_post(
     State(pool): State<PgPool>, user: User, Path(path_post): Path<PathPost>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let post = crate::posts::get_post(&mut conn, user.account_id, path_post.post_id).await?;
     Ok((StatusCode::CREATED, Json(post)))
@@ -81,7 +80,7 @@ pub fn get_post_docs(op: TransformOperation) -> TransformOperation {
 pub async fn change_post(
     State(pool): State<PgPool>, user: User, Path(path_post): Path<PathPost>,
     Json(body): Json<ChangePostInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let post =
         crate::posts::change_post(&mut conn, user.account_id, path_post.post_id, body).await?;
@@ -106,7 +105,7 @@ pub struct PathCategory {
 #[debug_handler]
 pub async fn create_category(
     State(pool): State<PgPool>, user: User, Json(body): Json<CreateCategoryInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let category = crate::categories::create_category(&mut conn, user.account_id, body).await?;
     Ok((StatusCode::CREATED, Json(category)))
@@ -123,7 +122,7 @@ pub fn create_category_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn list_categories(
     State(pool): State<PgPool>, user: User, Query(query): Query<CategoryQuery>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let categories = crate::categories::list_categories(&mut conn, user.account_id, query).await?;
     Ok((StatusCode::OK, Json(categories)))
@@ -140,7 +139,7 @@ pub fn list_categories_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn get_category(
     State(pool): State<PgPool>, user: User, Path(path): Path<PathCategory>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let category =
         crate::categories::get_category_by_id(&mut conn, path.category_id, user.account_id).await?;
@@ -159,7 +158,7 @@ pub fn get_category_docs(op: TransformOperation) -> TransformOperation {
 pub async fn change_category(
     State(pool): State<PgPool>, user: User, Path(path): Path<PathCategory>,
     Json(body): Json<ChangeCategoryInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let category =
         crate::categories::change_category(&mut conn, path.category_id, user.account_id, body)
@@ -178,7 +177,7 @@ pub fn change_category_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn delete_category(
     State(pool): State<PgPool>, user: User, Path(category_id): Path<Uuid>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     crate::categories::delete_category(&mut conn, category_id, user.account_id).await?;
     Ok(StatusCode::NO_CONTENT)
@@ -204,7 +203,7 @@ pub struct PathPostImage {
 pub async fn create_post_image(
     State(pool): State<PgPool>, _user: User, Path(path_post): Path<PathPost>,
     Json(body): Json<CreatePostImageInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     // TODO: check if user is allowed to create post image
     let image = crate::post_images::create_post_image(&mut conn, path_post.post_id, body).await?;
@@ -222,7 +221,7 @@ pub fn create_post_image_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn list_post_images(
     State(pool): State<PgPool>, user: User, Path(path_post): Path<PathPost>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let images =
         crate::post_images::list_post_images(&mut conn, user.account_id, path_post.post_id).await?;
@@ -232,7 +231,7 @@ pub async fn list_post_images(
 pub fn list_post_images_docs(op: TransformOperation) -> TransformOperation {
     op.id("list_post_images")
         .description("List post images")
-        .response::<201, Json<Vec<PostImage>>>()
+        .response::<200, Json<Vec<PostImage>>>()
         .security_requirement("Bearer")
         .tag("blogs")
 }
@@ -241,7 +240,7 @@ pub fn list_post_images_docs(op: TransformOperation) -> TransformOperation {
 pub async fn change_post_image(
     State(pool): State<PgPool>, user: User, Path(post_image_path): Path<PathPostImage>,
     Json(body): Json<ChangePostImageInput>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     let post_image = crate::post_images::change_post_image(
         &mut conn,
@@ -256,7 +255,7 @@ pub async fn change_post_image(
 pub fn change_post_image_docs(op: TransformOperation) -> TransformOperation {
     op.id("change_post_image")
         .description("Change post image")
-        .response::<201, Json<PostImage>>()
+        .response::<200, Json<PostImage>>()
         .security_requirement("Bearer")
         .tag("blogs")
 }
@@ -264,7 +263,7 @@ pub fn change_post_image_docs(op: TransformOperation) -> TransformOperation {
 #[debug_handler]
 pub async fn delete_post_image(
     State(pool): State<PgPool>, user: User, Path(post_image_path): Path<PathPostImage>,
-) -> Result<impl IntoApiResponse, Error> {
+) -> Result<impl IntoApiResponse, AppError> {
     let mut conn = pool.acquire().await?;
     crate::post_images::delete_post_image(
         &mut conn,
@@ -278,13 +277,13 @@ pub async fn delete_post_image(
 pub fn delete_post_image_docs(op: TransformOperation) -> TransformOperation {
     op.id("delete_post_image")
         .description("Delete post image")
-        .response::<201, ()>()
+        .response::<204, ()>()
         .security_requirement("Bearer")
         .tag("blogs")
 }
 
 pub fn routes(app_state: AppState) -> aide::axum::ApiRouter {
-    let admin = aide::axum::ApiRouter::new()
+    aide::axum::ApiRouter::new()
         .api_route(
             "/categories",
             post_with(create_category, create_category_docs),
@@ -325,12 +324,5 @@ pub fn routes(app_state: AppState) -> aide::axum::ApiRouter {
             "/posts/:post_id/images/:post_image_id",
             delete_with(delete_post_image, delete_post_image_docs),
         )
-        .layer(middleware::from_fn_with_state(
-            app_state.clone(),
-            accounts::authorization_layer,
-        ));
-
-    aide::axum::ApiRouter::new()
-        .nest("/admin", admin)
         .with_state(app_state)
 }

@@ -8,10 +8,11 @@ export type ChangePostInput = {
     body_text?: string | null;
     category_id?: string | null;
     is_featured?: boolean | null;
-    keywords?: Array<string>;
     locale?: string | null;
+    meta_description?: string | null;
+    meta_keywords?: string | null;
+    meta_title?: string | null;
     published_at?: string | null;
-    reading_time_minutes?: number | null;
     short_description?: string | null;
     slug?: string | null;
     title?: string | null;
