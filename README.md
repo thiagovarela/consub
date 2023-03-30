@@ -25,19 +25,19 @@ Given that there is only one database, migrations are shared in a single folder 
 
 ### Roadmap
 
-[] Media Uploader sucks, I need to define a set of recommended image sizes to be uploaded in the first place, then resize accordinly and generate the "image set", allow alt and/or caption to be included, define a decent webp compression.
-[] Get the analytics app set up
-[] Get the Content Editor into a usable state (fix the bubble menu, maybe add the floating), add localstorage save?
-[] Revisit the test suite since I'm happy with current state of public/admin apis.
-[] Cargo docs... not sure..
-[] Workers app -- postgres skip locked job queue to initially send emails...
-[] Leads app -- should be quick to set up a couple of endpoints.
-[] Account password change/recovery, invitation
-[] Account profile management so it can be properly used by Blogs
-[] Set up an API metrics exporter to be used by fly.io managed prometheus/grafana
-[] API rate limiting/cors
-[] Remove Opendal if I'm just sticking with S3 to upload files.
-[] Pages app, depends on how the content editor supports more flexible types of content/layouts.
+- [ ] Media Uploader sucks, I need to define a set of recommended image sizes to be uploaded in the first place, then resize accordinly and generate the "image set", allow alt and/or caption to be included, define a decent webp compression.
+- [ ] Get the analytics app set up
+- [ ] Get the Content Editor into a usable state (fix the bubble menu, maybe add the floating), add localstorage save?
+- [ ] Revisit the test suite since I'm happy with current state of public/admin apis.
+- [ ] Cargo docs... not sure..
+- [ ] Workers app -- postgres skip locked job queue to initially send emails...
+- [ ] Leads app -- should be quick to set up a couple of endpoints.
+- [ ] Account password change/recovery, invitation
+- [ ] Account profile management so it can be properly used by Blogs
+- [ ] Set up an API metrics exporter to be used by fly.io managed prometheus/grafana
+- [ ] API rate limiting/cors
+- [ ] Remove Opendal if I'm just sticking with S3 to upload files.
+- [ ] Pages app, depends on how the content editor supports more flexible types of content/layouts.
 
 For now, search is staying as postgres queries. 
 
