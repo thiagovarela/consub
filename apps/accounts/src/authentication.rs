@@ -79,10 +79,14 @@ pub async fn get_claims_from_bearer_token(
     conn: &sqlx::PgPool, token: String,
 ) -> Result<ConsubClaims, AppError> {
     let token = UntrustedToken::new(&token)?;
-    let account_key_id = token.header().key_id.as_deref().ok_or(AppError::BadRequest("Unable to retrieve the account key id from the access token".into()))?;
-    
+    let account_key_id = token
+        .header()
+        .key_id
+        .as_deref()
+        .ok_or(AppError::BadRequest(
+            "Unable to retrieve the account key id from the access token".into(),
+        ))?;
 
-    
     let account_key_id = Uuid::parse_str(account_key_id)
         .map_err(|_| AppError::BadRequest("Access key id is not in the expected format".into()))?;
 

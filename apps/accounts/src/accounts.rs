@@ -76,7 +76,7 @@ pub async fn create_account(
 pub async fn create_account_key(
     conn: &mut PgConnection, account_id: Uuid,
 ) -> Result<AccountKey, sqlx::Error> {
-    let keypair = KeyPair::from_seed(Seed::default());    
+    let keypair = KeyPair::from_seed(Seed::default());
     sqlx::query_as!(
         AccountKey,
         r#"

@@ -13,8 +13,6 @@ use axum::{response::IntoResponse, Extension, Json};
 use shared::AppState;
 
 pub fn docs_routes(state: AppState) -> ApiRouter {
-    
-
     ApiRouter::new()
         .api_route_with(
             "/",
@@ -35,8 +33,6 @@ async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl IntoApiResp
 }
 
 pub fn public_docs(state: AppState) -> ApiRouter {
-    
-
     ApiRouter::new()
         .route("/api.json", get(serve_docs))
         .with_state(state)

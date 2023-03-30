@@ -112,10 +112,7 @@ async fn main() -> Result<(), axum::BoxError> {
     let public = ApiRouter::new()
         .nest("/blogs", blogs::public_routes(app_state.clone()))
         .nest("/media", media::public_routes(app_state.clone()))
-        .nest(
-            "/clippings",
-            clippings::public_routes(app_state.clone()),
-        )
+        .nest("/clippings", clippings::public_routes(app_state.clone()))
         .nest_api_service("/docs", public_docs(app_state.clone()))
         .finish_api_with(&mut public_api, public_api_docs)
         .layer(Extension(Arc::new(public_api)));

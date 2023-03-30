@@ -8,12 +8,10 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use shared::{AppState, AppError};
+use shared::{AppError, AppState};
 use sqlx::PgPool;
 
-use crate::{
-    router::{ImageResponse, PathImage},
-};
+use crate::router::{ImageResponse, PathImage};
 
 pub async fn get_image(
     State(pool): State<PgPool>, account: Account, Path(path): Path<PathImage>,

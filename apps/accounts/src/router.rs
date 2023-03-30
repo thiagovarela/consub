@@ -1,5 +1,5 @@
 use crate::accounts::CreatePublicAccountInput;
-use crate::authentication::{authorization_layer, AccessToken};
+use crate::authentication::AccessToken;
 
 use crate::extractors::AccountID;
 use crate::User;
@@ -8,7 +8,7 @@ use aide::axum::{ApiRouter, IntoApiResponse};
 use aide::transform::TransformOperation;
 use axum::http::StatusCode;
 use axum::routing::{get, post};
-use axum::{debug_handler, middleware, Json};
+use axum::{debug_handler, Json};
 use axum::{extract::State, response::IntoResponse};
 use schemars::JsonSchema;
 use shared::{AppError, AppState};
@@ -77,24 +77,16 @@ pub async fn list_account_keys(
 }
 
 pub fn routes(app_state: AppState) -> ApiRouter {
-    let open_routes = ApiRouter::new().route("/", post(create_account)).api_route(
-        "/users/access-tokens/passwords",
-        post_with(
-            create_user_access_token_with_password,
-            create_user_access_token_with_password_docs,
-        ),
-    );
-
-    let protected_routes = ApiRouter::new()
+    ApiRouter::new()
+        .route("/", post(create_account))
+        .api_route(
+            "/users/access-tokens/passwords",
+            post_with(
+                create_user_access_token_with_password,
+                create_user_access_token_with_password_docs,
+            ),
+        )
         .api_route("/users/profiles", get_with(user_profile, user_profile_docs))
         .route("/account-keys", get(list_account_keys))
-        .layer(middleware::from_fn_with_state(
-            app_state.clone(),
-            authorization_layer,
-        ));
-
-    ApiRouter::new()
-        .merge(open_routes)
-        .merge(protected_routes)
         .with_state(app_state)
 }

@@ -54,12 +54,14 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
-            AppError::InternalServerError(_inner) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "something went wrong".to_string())
-            }
-            AppError::ValidationError(_inner) => {
-                (StatusCode::UNPROCESSABLE_ENTITY, "validation errors".to_string())
-            }
+            AppError::InternalServerError(_inner) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "something went wrong".to_string(),
+            ),
+            AppError::ValidationError(_inner) => (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                "validation errors".to_string(),
+            ),
             AppError::BadRequest(message) => (StatusCode::BAD_REQUEST, message),
             AppError::Forbidden(message) => (StatusCode::FORBIDDEN, message),
             AppError::Unauthorized(message) => (StatusCode::UNAUTHORIZED, message),
@@ -93,7 +95,7 @@ pub mod testing {
     pub fn test_opendal_uploader() -> OpendalUploader {
         let builder = opendal::services::Memory::default();
         let op: opendal::Operator = opendal::Operator::new(builder).unwrap().finish();
-        
+
         crate::OpendalUploader(std::sync::Arc::new(op))
     }
 

@@ -49,10 +49,7 @@ pub async fn list_posts(
         crate::categories::get_category_by_ids(
             &mut conn,
             account.id,
-            posts
-                .iter()
-                .filter_map(|p| p.category_id)
-                .collect(),
+            posts.iter().filter_map(|p| p.category_id).collect(),
         )
         .await?
     };

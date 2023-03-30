@@ -16,15 +16,13 @@ use aide::{
 
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use shared::{AppState, OpendalUploader, AppError};
+use shared::{AppError, AppState, OpendalUploader};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{
-    images::{
-        create_image, create_image_set, get_image, get_image_set, ChangeImageInput, Image,
-        ImageQuery, ImageSet,
-    },
+use crate::images::{
+    create_image, create_image_set, get_image, get_image_set, ChangeImageInput, Image, ImageQuery,
+    ImageSet,
 };
 
 static IMAGES_CDN_PATH: Lazy<String> = Lazy::new(|| {
@@ -144,9 +142,5 @@ pub fn routes(app_state: AppState) -> ApiRouter {
         .api_route("/images", post_with(upload_image, upload_image_docs))
         .api_route("/images", get_with(list_images, list_image_docs))
         .layer(DefaultBodyLimit::max(50 * 1000 * 1000))
-        .layer(middleware::from_fn_with_state(
-            app_state.clone(),
-            accounts::authorization_layer,
-        ))
         .with_state(app_state)
 }
