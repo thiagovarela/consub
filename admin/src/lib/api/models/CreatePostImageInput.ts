@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 export type CreatePostImageInput = {
-    image_type: string;
-    media_id: string;
+	image_type: string;
+	media_id: string;
 };
-

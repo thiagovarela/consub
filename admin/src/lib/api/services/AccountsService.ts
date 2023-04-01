@@ -10,35 +10,33 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
 export class AccountsService {
+	/**
+	 * Get an access token for a user with a password.
+	 * @returns AccessToken
+	 * @throws ApiError
+	 */
+	public static getAccessTokenWithPassword({
+		requestBody
+	}: {
+		requestBody: CreateUserAccessTokenWithPassword;
+	}): CancelablePromise<AccessToken> {
+		return __request(OpenAPI, {
+			method: 'POST',
+			url: '/admin/accounts/users/access-tokens/passwords',
+			body: requestBody,
+			mediaType: 'application/json'
+		});
+	}
 
-    /**
-     * Get an access token for a user with a password.
-     * @returns AccessToken
-     * @throws ApiError
-     */
-    public static getAccessTokenWithPassword({
-        requestBody,
-    }: {
-        requestBody: CreateUserAccessTokenWithPassword,
-    }): CancelablePromise<AccessToken> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/admin/accounts/users/access-tokens/passwords',
-            body: requestBody,
-            mediaType: 'application/json',
-        });
-    }
-
-    /**
-     * Get the profile of the current user.
-     * @returns User
-     * @throws ApiError
-     */
-    public static getUserProfile(): CancelablePromise<User> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/admin/accounts/users/profiles',
-        });
-    }
-
+	/**
+	 * Get the profile of the current user.
+	 * @returns User
+	 * @throws ApiError
+	 */
+	public static getUserProfile(): CancelablePromise<User> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: '/admin/accounts/users/profiles'
+		});
+	}
 }

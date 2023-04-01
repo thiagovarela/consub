@@ -59,24 +59,22 @@ pub async fn upload_image(
 
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
-        let filename = if let Some(filename) = field.file_name() {
-            filename.to_string()
-        } else {
-            continue;
+                
+        let extension = match field.content_type().unwrap() {
+            "image/jpeg" => "jpg",
+            "image/png" => "png",
+            "image/gif" => "gif",
+            "image/webp" => "webp",
+            _ => continue,
         };
-        // TODO: change this later for a simple match on the content type
-        let extension = std::path::Path::new(&filename)
-            .extension()
-            .unwrap()
-            .to_string_lossy();
 
         let cdn_path = &*IMAGES_CDN_PATH;
-
-        let path = format!("{cdn_path}/{account_id_ulid}/{image_id_ulid}/{name}.{extension}");
+        let file_path = format!("{account_id_ulid}/{image_id_ulid}/{name}.{extension}");
+        let path = format!("{cdn_path}/{file_path}");
 
         let data = field.bytes().await.unwrap();
 
-        opendal.write(&path, data).await.unwrap();
+        opendal.write(&file_path, data).await.unwrap();
         let mut conn = pool.acquire().await?;
         create_image_set(&mut conn, image.id, name, path).await?;
     }

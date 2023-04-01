@@ -1,11 +1,12 @@
 <script lang="ts">
+	// @ts-ignore
 	import Dropzone from 'svelte-file-dropzone';
-	import loadImage from 'blueimp-load-image';
 	import { page } from '$app/stores';
-	import { srcset } from '$lib/images';
 	import ImageSet from './images/ImageSet.svelte';
-	export let show: boolean = false;
-	export let onMediaSelect: Function | undefined;
+	export let onMediaSelect: Function | undefined = undefined;
+	export let showTabs = false;
+	import imageCompression from 'browser-image-compression';
+	import axios from 'axios';
 
 	let url = `/admin/${$page.params.subdomain}/media`;
 
@@ -15,6 +16,8 @@
 	}
 
 	let tab: Tabs = Tabs.Files;
+	let canUpload = false;
+	let resizing = false;
 
 	async function getRecent() {
 		let response = await fetch(`${url}/images`);
@@ -23,6 +26,7 @@
 	}
 
 	export let images: Map<string, Image[]> = new Map();
+	let progressSteps: Map<string, number> = new Map();
 	let thumbs: Image[] = [];
 
 	interface Image {
@@ -41,104 +45,108 @@
 		maxHeight: number,
 		quality?: number
 	): Promise<File> {
-		console.log('resizing image', maxWidth, maxHeight, quality);
-		let loadedImage = await loadImage(file, {
-			canvas: true,
-			maxWidth,
-			maxHeight,
-			cover: true,
-			orientation: true,
-			imageSmoothingQuality: 'high'
-		});
+		const options = {
+			maxSizeMB: 1,
+			maxWidthOrHeight: maxWidth,
+			useWebWorker: true,
+			maxIteration: 2,
+			fileType: 'image/webp'
+		};
 
-		// @ts-ignore - the loadedImage library returns a img element but we only use canvas.
-		let blob = await getCanvasBlob(loadedImage.image, quality);
-		let source = new File([blob], `image_${maxWidth}x${maxHeight}.webp`, {
-			type: 'image/webp'
-		});
-		return Promise.resolve(source);
+		const blob = await imageCompression(file, options);
+		console.log('resizing image', maxWidth, maxHeight, quality, blob);
+		return Promise.resolve(new File([blob], file.name, { type: 'image/webp' }));
 	}
 
-	function handleFilesSelect(e: { detail: { acceptedFiles: any } }) {
+	function updateProgress(fileName: string, step: number) {
+		progressSteps.set(fileName, step);
+		progressSteps = progressSteps; // Triggers svelte reactivity for maps
+	}
+
+	async function handleFilesSelect(e: { detail: { acceptedFiles: any } }) {
+		canUpload = false;
 		const { acceptedFiles } = e.detail;
 
-		acceptedFiles.forEach(async (file: File) => {
+		const promises = acceptedFiles.map(async (file: File) => {
 			let optimized: any[] = [];
 			let imageBitmap = await createImageBitmap(file);
-			let quality = 0.7;
+			let quality = 0.8;
+			resizing = true;
 
 			let resized = await resizeImage(file, 320, 320, quality);
 			thumbs.push({ file: resized, width: 320, height: 320 });
 			thumbs = thumbs; // Triggers svelte reactivity for arrays
+			updateProgress(file.name, 1);
 
 			if (imageBitmap.width > 640) {
 				resized = await resizeImage(file, 640, 480, quality);
 				optimized.push({ file: resized, width: 640, height: 480 });
 			}
+			updateProgress(file.name, 25);
 
 			if (imageBitmap.width > 1280) {
 				resized = await resizeImage(file, 1280, 720, quality);
 				optimized.push({ file: resized, width: 1280, height: 720 });
 			}
+			updateProgress(file.name, 45);
 
 			if (imageBitmap.width > 1920) {
 				resized = await resizeImage(file, 1920, 1080, quality);
 				optimized.push({ file: resized, width: 1920, height: 1080 });
 			}
+			updateProgress(file.name, 65);
 
 			if (imageBitmap.width > 2400) {
 				resized = await resizeImage(file, 2400, 1920, quality);
 				optimized.push({ file: resized, width: 2400, height: 1920 });
 			}
+			updateProgress(file.name, 85);
 
 			resized = await resizeImage(file, imageBitmap.width, imageBitmap.height, quality);
 			optimized.push({ file: resized, width: imageBitmap.width, height: imageBitmap.height });
+			updateProgress(file.name, 100);
 
 			images.set(file.name, optimized);
 		});
-	}
 
-	function getCanvasBlob(canvas: HTMLCanvasElement, quality?: number): Promise<Blob> {
-		return new Promise(function (resolve, reject) {
-			canvas.toBlob(
-				function (blob) {
-					if (blob) {
-						resolve(blob);
-					} else {
-						reject('Error converting to webp');
-					}
-				},
-				'image/webp',
-				quality
-			);
-		});
+		await Promise.all(promises);
+
+		canUpload = images.size > 0;
 	}
 
 	async function uploadFiles() {
+		resizing = false;
 		for (const item of images) {
 			console.log('sending image', item);
 
 			const imageset = item[1];
 			const formData = new FormData();
 			imageset.forEach((image) => {
-				console.log('Preparing', image.file.name, image.file.size / 1024, 'kb');
-				formData.append(imageSize(image), image.file);
+				let name = imageSize(image);
+				console.log('Preparing', name, image.file.size / 1024 / 1024, 'mb');
+				formData.append(name, image.file);
 			});
 
-			let response = await fetch(`/admin/${$page.params.subdomain}/media`, {
-				method: 'POST',
-				body: formData
-			});
-			console.log(response);
-			let res = await response.json();
-			console.log('response', res);
+			console.log(formData);
+
+			axios
+				.request({
+					method: 'POST',
+					url: `/admin/${$page.params.subdomain}/media`,
+					data: formData,
+					onUploadProgress: (p) => {
+						updateProgress(item[0], Math.floor((p.progress ?? 1) * 100));
+					}
+				})
+				.then((data) => {
+					console.log(data);
+				});
 		}
 	}
 
 	function close() {
 		images.clear();
 		thumbs = [];
-		show = false;
 	}
 </script>
 
@@ -151,141 +159,114 @@
 	}
 </style>
 
-<div
-	class="relative z-10"
-	class:hidden={!show}
-	aria-labelledby="modal-title"
-	role="dialog"
-	aria-modal="true">
-	<!--
-      Background backdrop, show/hide based on modal state.
-  
-      Entering: "ease-out duration-300"
-        From: "opacity-0"
-        To: "opacity-100"
-      Leaving: "ease-in duration-200"
-        From: "opacity-100"
-        To: "opacity-0"
-    -->
-	<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+<div>
+	<div class="sm:hidden">
+		<label for="___tabs" class="sr-only">Select a tab</label>
+		<!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+		<select
+			name="___tabs"
+			id="___tabs"
+			class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+			<option>My Account</option>
 
-	<div class="fixed inset-0 z-10 overflow-y-auto">
-		<div
-			class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-			<!--
-          Modal panel, show/hide based on modal state.
-  
-          Entering: "ease-out duration-300"
-            From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            To: "opacity-100 translate-y-0 sm:scale-100"
-          Leaving: "ease-in duration-200"
-            From: "opacity-100 translate-y-0 sm:scale-100"
-            To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-        -->
-			<div
-				class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-				<div>
-					<div class="sm:hidden">
-						<label for="___tabs" class="sr-only">Select a tab</label>
-						<!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
-						<select
-							name="___tabs"
-							id="___tabs"
-							class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-							<option>My Account</option>
+			<option>Company</option>
 
-							<option>Company</option>
+			<option selected>Team Members</option>
 
-							<option selected>Team Members</option>
+			<option>Billing</option>
+		</select>
+	</div>
+	{#if showTabs}
+		<div class="hidden sm:block">
+			<nav class="flex space-x-4" aria-label="Tabs">
+				<!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
+				<button
+					on:click|preventDefault={() => (tab = Tabs.Files)}
+					class:tab={tab != Tabs.Files}
+					class:tab-selected={tab == Tabs.Files}>
+					Upload Files
+				</button>
 
-							<option>Billing</option>
-						</select>
-					</div>
-
-					<div class="hidden sm:block">
-						<nav class="flex space-x-4" aria-label="Tabs">
-							<!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
-							<button
-								on:click|preventDefault={() => (tab = Tabs.Files)}
-								class:tab={tab != Tabs.Files}
-								class:tab-selected={tab == Tabs.Files}>
-								Upload Files
-							</button>
-
-							<button
-								on:click|preventDefault={() => (tab = Tabs.Recent)}
-								class:tab={tab != Tabs.Recent}
-								class:tab-selected={tab == Tabs.Recent}>
-								Recent Uploaded
-							</button>
-						</nav>
-					</div>
-				</div>
-				{#if tab == Tabs.Files}
-					<div>
-						<div class="mt-3 text-center sm:mt-5">
-							<Dropzone
-								on:drop={handleFilesSelect}
-								accept={[
-									'image/png',
-									'image/jpeg',
-									'image/webp',
-									'image/gif',
-									'image/svg+xml'
-								]} />
-						</div>
-					</div>
-					<div>
-						{#if thumbs.length > 0}
-							<div class="text-sm">Preview</div>
-							<div class="columns-2 md:columns-3 lg:columns-4">
-								{#each thumbs as item}
-									<img
-										class="h-auto max-w-full rounded-lg border border-gray-200"
-										src={URL.createObjectURL(item.file)}
-										alt="thumbnail" />
-								{/each}
-							</div>
-						{/if}
-					</div>
-					<div
-						class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-						<button
-							on:click={() => uploadFiles()}
-							type="button"
-							class="inline-flex w-full justify-center rounded-md bg-slate-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 sm:col-start-2">
-							Upload
-						</button>
-						<button
-							on:click={() => close()}
-							type="button"
-							class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0">
-							Cancel
-						</button>
-					</div>
-				{/if}
-				{#if tab == Tabs.Recent}
-					<div>
-						<div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-							{#await getRecent() then recentImages}
-								{#each recentImages as image}
-									<div>
-										<button
-											on:click|preventDefault={() => {
-												if (onMediaSelect) {
-													onMediaSelect(image.image_set);
-												}
-												close();
-											}}>
-											<ImageSet imageSet={image.image_set} />
-										</button>
-									</div>
-								{/each}
-							{/await}
-						</div>
-					</div>
-				{/if}
+				<button
+					on:click|preventDefault={() => (tab = Tabs.Recent)}
+					class:tab={tab != Tabs.Recent}
+					class:tab-selected={tab == Tabs.Recent}>
+					Recent Uploaded
+				</button>
+			</nav>
+		</div>
+	{/if}
+	{#if tab == Tabs.Files}
+		<div>
+			<div class="mt-3 text-center sm:mt-5">
+				<Dropzone
+					on:drop={async (e) => await handleFilesSelect(e)}
+					accept={[
+						'image/png',
+						'image/jpeg',
+						'image/webp',
+						'image/gif',
+						'image/svg+xml'
+					]} />
 			</div>
 		</div>
-	</div>
+		<div>
+			{#if thumbs.length > 0}
+				<div class="text-sm">Preview</div>
+				<div class="columns-2 md:columns-3 lg:columns-4">
+					{#each thumbs as item}
+						<div class="flex flex-wrap">
+							<div class="w-full bg-neutral-200 dark:bg-neutral-600">
+								<div
+									class="bg-slate-400 p-0.5 text-center text-xs font-medium leading-none text-primary-100"
+									style="width: {progressSteps.get(item.file.name) ?? 1}%">
+									{#if resizing}
+										Resizing: {progressSteps.get(item.file.name) ?? 1}%
+									{:else}
+										Uploading: {progressSteps.get(item.file.name) ?? 1}%
+									{/if}
+								</div>
+							</div>
+							<img
+								class="h-auto max-w-full rounded-lg border border-gray-200 block"
+								src={URL.createObjectURL(item.file)}
+								alt="thumbnail" />
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+		<div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+			<button
+				on:click={() => uploadFiles()}
+				type="button"
+				disabled={!canUpload}
+				class="inline-flex w-full justify-center rounded-md bg-slate-600 px-3 py-2 text-sm 
+						disabled:opacity-50 disabled:cursor-not-allowed
+						font-semibold text-white shadow-sm hover:bg-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 sm:col-start-2">
+				Upload
+			</button>
+		</div>
+	{/if}
+	{#if tab == Tabs.Recent}
+		<div>
+			<div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+				{#await getRecent() then recentImages}
+					{#each recentImages as image}
+						<div>
+							<button
+								on:click|preventDefault={() => {
+									if (onMediaSelect) {
+										onMediaSelect(image.image_set);
+									}
+									close();
+								}}>
+								<ImageSet imageSet={image.image_set} />
+							</button>
+						</div>
+					{/each}
+				{/await}
+			</div>
+		</div>
+	{/if}
 </div>

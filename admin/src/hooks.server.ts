@@ -6,7 +6,7 @@ import { logger } from '$lib/logger';
 import { OpenAPI } from '$lib/api/core/OpenAPI';
 import { env } from '$env/dynamic/private';
 
-export const handle = (async ({ event, resolve }) => {	
+export const handle = (async ({ event, resolve }) => {
 	let subdomain = event.params.subdomain;
 	let cookies = event.cookies;
 	OpenAPI.BASE = env.API_ENDPOINT;

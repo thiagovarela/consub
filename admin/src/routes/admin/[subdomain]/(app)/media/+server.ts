@@ -8,7 +8,7 @@ export const POST = (async ({ request, fetch }) => {
 	// TODO: use streams
 
 	// FIXME: using axios is not working for some reason, for now we use fetch
-	let response = await fetch(`${OpenAPI.BASE}/media/admin/images`, {
+	let response = await fetch(`${OpenAPI.BASE}/admin/media/images`, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${OpenAPI.TOKEN}`

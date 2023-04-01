@@ -6,6 +6,5 @@
  * routes for posts
  */
 export type PathPost = {
-    post_id: string;
+	post_id: string;
 };
-

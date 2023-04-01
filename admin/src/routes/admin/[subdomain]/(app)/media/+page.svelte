@@ -42,7 +42,12 @@
 		</div>
 	</span>
 </BasePage>
-<MediaUpload bind:show={imageUploadModal} />
+
+{#if imageUploadModal}
+	<Modal bind:show={imageUploadModal}>
+		<MediaUpload />
+	</Modal>
+{/if}
 
 {#if imageModal && selectedImage}
 	<Modal bind:show={imageModal}>

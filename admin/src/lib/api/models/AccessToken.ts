@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 export type AccessToken = {
-    expires_at: string;
-    token: string;
+	expires_at: string;
+	token: string;
 };
-

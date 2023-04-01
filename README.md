@@ -25,7 +25,7 @@ Given that there is only one database, migrations are shared in a single folder 
 
 ### Roadmap
 
-- [ ] Media Uploader sucks, I need to define a set of recommended image sizes to be uploaded in the first place, then resize accordinly and generate the "image set", allow alt and/or caption to be included, define a decent webp compression.
+- [ ] ~~Media Uploader sucks, I need to define a set of recommended image sizes to be uploaded in the first place, then resize accordinly and generate the "image set", allow alt and/or caption to be included, define a decent webp compression.~~ Added a resize progress and upload progress bar, very ugly but ok. Postponing other changes (alt, caption, delete image)
 - [ ] Get the analytics app set up
 - [ ] Get the Content Editor into a usable state (fix the bubble menu, maybe add the floating), add localstorage save?
 - [ ] Revisit the test suite since I'm happy with current state of public/admin apis.

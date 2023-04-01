@@ -6,16 +6,14 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 
 export class DefaultService {
-
-    /**
-     * This documentation page.
-     * @throws ApiError
-     */
-    public static getDocs(): CancelablePromise<void> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/docs/',
-        });
-    }
-
+	/**
+	 * This documentation page.
+	 * @throws ApiError
+	 */
+	public static getDocs(): CancelablePromise<void> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: '/docs/'
+		});
+	}
 }

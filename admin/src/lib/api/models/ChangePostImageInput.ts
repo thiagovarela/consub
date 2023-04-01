@@ -3,6 +3,5 @@
 /* eslint-disable */
 
 export type ChangePostImageInput = {
-    image_type?: string | null;
+	image_type?: string | null;
 };
-
