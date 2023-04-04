@@ -119,32 +119,50 @@ export class BlogsService {
 	 * @throws ApiError
 	 */
 	public static listPosts({
+		after,
+		before,
 		categoryId,
 		categorySlug,
 		isFeatured,
 		locale,
 		publishedAt,
 		slug,
+		take = 100,
 		translationOf
 	}: {
+		/**
+		 * The pagination cursor to start at.
+		 */
+		after?: string | null;
+		/**
+		 * The pagination cursor to end at.
+		 */
+		before?: string | null;
 		categoryId?: Array<string>;
 		categorySlug?: string | null;
 		isFeatured?: boolean | null;
 		locale?: string | null;
 		publishedAt?: string | null;
 		slug?: string | null;
+		/**
+		 * The number of items to return. Default is 100.
+		 */
+		take?: number;
 		translationOf?: string | null;
 	}): CancelablePromise<Array<Post>> {
 		return __request(OpenAPI, {
 			method: 'GET',
 			url: '/admin/blogs/posts',
 			query: {
+				after: after,
+				before: before,
 				category_id: categoryId,
 				category_slug: categorySlug,
 				is_featured: isFeatured,
 				locale: locale,
 				published_at: publishedAt,
 				slug: slug,
+				take: take,
 				translation_of: translationOf
 			}
 		});

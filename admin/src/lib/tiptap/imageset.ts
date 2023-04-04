@@ -59,6 +59,12 @@ export const TipTapImageSet = Node.create<ImageOptions>({
 			},
 			title: {
 				default: null
+			},
+			style: {
+				default: null
+			},
+			width: {
+				default: null
 			}
 		};
 	},
@@ -71,7 +77,7 @@ export const TipTapImageSet = Node.create<ImageOptions>({
 		];
 	},
 
-	renderHTML({ HTMLAttributes }) {
+	renderHTML({ HTMLAttributes }) {		
 		return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)];
 	},
 

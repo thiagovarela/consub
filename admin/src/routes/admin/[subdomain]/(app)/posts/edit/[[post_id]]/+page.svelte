@@ -132,7 +132,7 @@
 				update({ reset: false });
 			};
 		}}>
-		<div class="mt-8 grid grid-cols-1 gap-6 px-6 lg:grid-flow-col-dense lg:grid-cols-4">
+		<div class="mt-8 grid grid-cols-1 gap-6 md:px-6 lg:grid-flow-col-dense lg:grid-cols-4">
 			<div class="space-y-6 lg:col-span-3 lg:col-start-1">
 				<ul>
 					{#if selectedImage}
@@ -220,6 +220,7 @@
 									<input type="hidden" name="published_at" value={publishedAt} />
 									<DateInput
 										bind:value={publishedAt}
+										format="dd/MM/yyyy HH:mm"
 										placeholder="Choose a date" />
 								</div>
 							</div>

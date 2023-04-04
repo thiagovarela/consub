@@ -1,9 +1,10 @@
 use accounts::Account;
 use aide::{
-    axum::{routing::get_with, ApiRouter, IntoApiResponse},
+    axum::{routing::get_with, IntoApiResponse, ApiRouter},
     transform::TransformOperation,
 };
 use axum::http::StatusCode;
+
 use axum::{debug_handler, extract::State, Json};
 use axum_extra::extract::Query;
 use schemars::JsonSchema;
@@ -92,8 +93,7 @@ pub fn list_posts_docs(op: TransformOperation) -> TransformOperation {
         .tag("blogs")
 }
 
-pub fn public_routes(app_state: AppState) -> aide::axum::ApiRouter {
+pub fn public_routes() -> ApiRouter<AppState> {
     ApiRouter::new()
-        .api_route("/posts", get_with(list_posts, list_posts_docs))
-        .with_state(app_state)
+        .api_route("/posts", get_with(list_posts, list_posts_docs))        
 }

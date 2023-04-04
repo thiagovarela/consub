@@ -4,13 +4,13 @@ use axum::{
     debug_handler,
     extract::{DefaultBodyLimit, Multipart, Path, State},
     http::StatusCode,
-    middleware, Json,
+    Json,
 };
 use axum_extra::extract::Query;
 
-use aide::axum::routing::{get_with, post_with};
+use aide::axum::{routing::{get_with, post_with}, ApiRouter};
 use aide::{
-    axum::{ApiRouter, IntoApiResponse},
+    axum::{IntoApiResponse},
     transform::TransformOperation,
 };
 
@@ -59,7 +59,7 @@ pub async fn upload_image(
 
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
-                
+
         let extension = match field.content_type().unwrap() {
             "image/jpeg" => "jpg",
             "image/png" => "png",
@@ -135,10 +135,9 @@ pub fn change_image_docs(op: TransformOperation) -> TransformOperation {
         .tag("media")
 }
 
-pub fn routes(app_state: AppState) -> ApiRouter {
+pub fn routes() -> ApiRouter<AppState> {
     ApiRouter::new()
         .api_route("/images", post_with(upload_image, upload_image_docs))
         .api_route("/images", get_with(list_images, list_image_docs))
-        .layer(DefaultBodyLimit::max(50 * 1000 * 1000))
-        .with_state(app_state)
+        .layer(DefaultBodyLimit::max(50 * 1000 * 1000))        
 }

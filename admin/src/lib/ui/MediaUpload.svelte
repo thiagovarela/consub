@@ -39,22 +39,15 @@
 		return `${image.width}x${image.height}`;
 	}
 
-	async function resizeImage(
-		file: File,
-		maxWidth: number,
-		maxHeight: number,
-		quality?: number
-	): Promise<File> {
+	async function resizeImage(file: File, maxWidth: number): Promise<File> {
 		const options = {
 			maxSizeMB: 1,
 			maxWidthOrHeight: maxWidth,
 			useWebWorker: true,
-			maxIteration: 2,
 			fileType: 'image/webp'
 		};
 
 		const blob = await imageCompression(file, options);
-		console.log('resizing image', maxWidth, maxHeight, quality, blob);
 		return Promise.resolve(new File([blob], file.name, { type: 'image/webp' }));
 	}
 
@@ -73,36 +66,36 @@
 			let quality = 0.8;
 			resizing = true;
 
-			let resized = await resizeImage(file, 320, 320, quality);
+			let resized = await resizeImage(file, 320);
 			thumbs.push({ file: resized, width: 320, height: 320 });
 			thumbs = thumbs; // Triggers svelte reactivity for arrays
 			updateProgress(file.name, 1);
 
 			if (imageBitmap.width > 640) {
-				resized = await resizeImage(file, 640, 480, quality);
+				resized = await resizeImage(file, 640);
 				optimized.push({ file: resized, width: 640, height: 480 });
 			}
 			updateProgress(file.name, 25);
 
 			if (imageBitmap.width > 1280) {
-				resized = await resizeImage(file, 1280, 720, quality);
+				resized = await resizeImage(file, 1280);
 				optimized.push({ file: resized, width: 1280, height: 720 });
 			}
 			updateProgress(file.name, 45);
 
 			if (imageBitmap.width > 1920) {
-				resized = await resizeImage(file, 1920, 1080, quality);
+				resized = await resizeImage(file, 1920);
 				optimized.push({ file: resized, width: 1920, height: 1080 });
 			}
 			updateProgress(file.name, 65);
 
 			if (imageBitmap.width > 2400) {
-				resized = await resizeImage(file, 2400, 1920, quality);
+				resized = await resizeImage(file, 2400);
 				optimized.push({ file: resized, width: 2400, height: 1920 });
 			}
 			updateProgress(file.name, 85);
 
-			resized = await resizeImage(file, imageBitmap.width, imageBitmap.height, quality);
+			resized = await resizeImage(file, imageBitmap.width);
 			optimized.push({ file: resized, width: imageBitmap.width, height: imageBitmap.height });
 			updateProgress(file.name, 100);
 
@@ -166,14 +159,8 @@
 		<select
 			name="___tabs"
 			id="___tabs"
-			class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
-			<option>My Account</option>
-
-			<option>Company</option>
-
-			<option selected>Team Members</option>
-
-			<option>Billing</option>
+			class="block w-full rounded-md border-gray-300 focus:border-slate-500 focus:ring-slate-500">
+			<option>WIP</option>
 		</select>
 	</div>
 	{#if showTabs}

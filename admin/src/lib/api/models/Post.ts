@@ -3,7 +3,6 @@
 /* eslint-disable */
 
 export type Post = {
-	account_id: string;
 	author_id: string;
 	body_html: string;
 	body_json: any;

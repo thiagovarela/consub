@@ -56,7 +56,7 @@ impl IntoResponse for AppError {
         let (status, error_message) = match self {
             AppError::InternalServerError(_inner) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "something went wrong".to_string(),
+                format!("something went wrong: {}", _inner),
             ),
             AppError::ValidationError(_inner) => (
                 StatusCode::UNPROCESSABLE_ENTITY,
@@ -88,9 +88,11 @@ where
 pub mod testing {
     use std::net::TcpListener;
 
+    use aide::axum::ApiRouter;
+    use axum::Router;
     use tracing_subscriber::EnvFilter;
 
-    use crate::OpendalUploader;
+    use crate::{AppState, OpendalUploader};
 
     pub fn test_opendal_uploader() -> OpendalUploader {
         let builder = opendal::services::Memory::default();
@@ -99,7 +101,7 @@ pub mod testing {
         crate::OpendalUploader(std::sync::Arc::new(op))
     }
 
-    pub async fn test_app(routes: aide::axum::ApiRouter) -> String {
+    pub async fn test_app(pool: sqlx::PgPool, routes: ApiRouter<AppState>) -> String {
         let listener = TcpListener::bind("127.0.0.1:0").expect("Unable to bind to address");
         let port = listener.local_addr().unwrap().port();
         let env_filter =
@@ -110,12 +112,17 @@ pub mod testing {
             .compact()
             .finish();
 
+        let router: Router = Router::new().merge(routes).with_state(AppState {
+            db_pool: pool,
+            opendal: test_opendal_uploader(),
+        });
+
         tracing::subscriber::set_global_default(subscriber).unwrap_or_default();
 
         tokio::spawn(async move {
             axum::Server::from_tcp(listener)
                 .unwrap()
-                .serve(routes.into_make_service())
+                .serve(router.into_make_service())
                 .await
                 .expect("failed to start")
         });

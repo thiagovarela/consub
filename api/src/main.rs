@@ -1,5 +1,7 @@
-use aide::{axum::ApiRouter, openapi::OpenApi, transform::TransformOpenApi};
+use aide::axum::ApiRouter;
+use aide::{openapi::OpenApi, transform::TransformOpenApi};
 use axum::routing::get;
+use axum::Router;
 use axum::{debug_handler, extract::State, http::StatusCode, Extension};
 use shared::{database_pool, AppState, OpendalUploader};
 use sqlx::PgPool;
@@ -97,32 +99,37 @@ async fn main() -> Result<(), axum::BoxError> {
     let mut public_api = OpenApi::default();
 
     let admin = ApiRouter::new()
-        .nest("/accounts", accounts::routes(app_state.clone()))
-        .nest("/blogs", blogs::routes(app_state.clone()))
-        .nest("/clippings", clippings::routes(app_state.clone()))
-        .nest("/media", media::routes(app_state.clone()));
+        .nest("/accounts", accounts::routes())
+        .nest("/blogs", blogs::routes())
+        .nest("/clippings", clippings::routes())
+        .nest("/media", media::routes());
 
-    // Prefixes all paths with /admin.
+    // Prefixes all paths with /admin and generate the private docs.
     let admin = ApiRouter::new()
         .nest("/admin", admin)
-        .nest_api_service("/admin/docs", docs_routes(app_state.clone()))
+        .nest("/admin/docs", docs_routes())        
         .finish_api_with(&mut api, api_docs)
         .layer(Extension(Arc::new(api)));
 
+    aide::gen::extract_schemas(true);
+
+    // Public routes without a prefix, then generate the public docs.
     let public = ApiRouter::new()
-        .nest("/blogs", blogs::public_routes(app_state.clone()))
-        .nest("/media", media::public_routes(app_state.clone()))
-        .nest("/clippings", clippings::public_routes(app_state.clone()))
-        .nest_api_service("/docs", public_docs(app_state.clone()))
+        .nest("/blogs", blogs::public_routes())
+        .nest("/media", media::public_routes())
+        .nest("/clippings", clippings::public_routes())
+        .nest("/analytics", analytics::public_routes())
+        .nest("/docs", public_docs())
         .finish_api_with(&mut public_api, public_api_docs)
         .layer(Extension(Arc::new(public_api)));
 
     // TODO: set up rate limiting, cors, etc.
-    let app = ApiRouter::new()
+    let app = Router::new()
         .merge(admin)
         .merge(public)
         .layer(tower_http::trace::TraceLayer::new_for_http())
-        .route("/health", get(health_check).with_state(app_state.clone()));
+        .route("/health", get(health_check))
+        .with_state(app_state);
 
     let address: SocketAddr = "[::0]:8000".parse()?;
     info!("Listening on {}", address);

@@ -1,6 +1,6 @@
 use accounts::Account;
 use aide::{
-    axum::{routing::get_with, ApiRouter, IntoApiResponse},
+    axum::{routing::get_with, IntoApiResponse, ApiRouter},
     transform::TransformOperation,
 };
 use axum::http::StatusCode;
@@ -31,8 +31,7 @@ pub fn get_image_docs(op: TransformOperation) -> TransformOperation {
         .tag("media")
 }
 
-pub fn public_routes(app_state: AppState) -> aide::axum::ApiRouter {
+pub fn public_routes() -> ApiRouter<AppState> {
     ApiRouter::new()
-        .api_route("/images/:image_id", get_with(get_image, get_image_docs))
-        .with_state(app_state)
+        .api_route("/images/:image_id", get_with(get_image, get_image_docs))        
 }

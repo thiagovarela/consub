@@ -2115,6 +2115,29 @@
     },
     "query": "\n        UPDATE blogs.posts\n        SET title = COALESCE($3, title),\n            slug = COALESCE($4, slug),\n            locale = COALESCE($5, locale),\n            body_json = COALESCE($6, body_json),\n            body_html = COALESCE($7, body_html),\n            body_text = COALESCE($8, body_text),\n            is_featured = COALESCE($9, is_featured),\n            short_description = COALESCE($10, short_description),\n            meta_title = COALESCE($11, meta_title),\n            meta_description = COALESCE($12, meta_description),\n            meta_keywords = COALESCE($13, meta_keywords),\n            category_id = COALESCE($14, category_id),            \n            translation_of = COALESCE($15, translation_of),\n            published_at = COALESCE($16, published_at)            \n        WHERE id = $1 \n            AND account_id = $2\n        RETURNING *\n        "
   },
+  "ca47b5f3b4b715f4c1db9b3d010fdc454ecdbc650539dda6a5bd8ec679a2f3a2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Timestamptz",
+          "Uuid",
+          "Text",
+          "Jsonb"
+        ]
+      }
+    },
+    "query": "\n        INSERT INTO analytics.page_views_raw (ts, account_id, path, headers)\n        VALUES ($1, $2, $3, $4)\n        RETURNING id\n        "
+  },
   "caca16f86c8a15c10e6cc8535b96156699dbae72387416560f7aaca48fb9ac66": {
     "describe": {
       "columns": [

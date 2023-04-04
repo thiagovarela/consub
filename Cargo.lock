@@ -122,6 +122,20 @@ dependencies = [
 [[package]]
 name = "analytics"
 version = "0.1.0"
+dependencies = [
+ "accounts",
+ "aide",
+ "axum",
+ "axum-extra",
+ "chrono",
+ "schemars",
+ "serde",
+ "serde_json",
+ "shared",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
 
 [[package]]
 name = "android_system_properties"
@@ -144,6 +158,7 @@ version = "0.1.0"
 dependencies = [
  "accounts",
  "aide",
+ "analytics",
  "axum",
  "blogs",
  "clippings",

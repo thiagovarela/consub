@@ -4,7 +4,7 @@ use crate::authentication::AccessToken;
 use crate::extractors::AccountID;
 use crate::User;
 use aide::axum::routing::{get_with, post_with};
-use aide::axum::{ApiRouter, IntoApiResponse};
+use aide::axum::{IntoApiResponse, ApiRouter};
 use aide::transform::TransformOperation;
 use axum::http::StatusCode;
 use axum::routing::{get, post};
@@ -76,9 +76,10 @@ pub async fn list_account_keys(
     Ok((StatusCode::OK, Json(keys)))
 }
 
-pub fn routes(app_state: AppState) -> ApiRouter {
+pub fn routes() -> ApiRouter<AppState> {
     ApiRouter::new()
         .route("/", post(create_account))
+        .route("/account-keys", get(list_account_keys))
         .api_route(
             "/users/access-tokens/passwords",
             post_with(
@@ -86,7 +87,5 @@ pub fn routes(app_state: AppState) -> ApiRouter {
                 create_user_access_token_with_password_docs,
             ),
         )
-        .api_route("/users/profiles", get_with(user_profile, user_profile_docs))
-        .route("/account-keys", get(list_account_keys))
-        .with_state(app_state)
+        .api_route("/users/profiles", get_with(user_profile, user_profile_docs))        
 }

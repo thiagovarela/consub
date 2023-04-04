@@ -10,10 +10,10 @@ export class DefaultService {
 	 * This documentation page.
 	 * @throws ApiError
 	 */
-	public static getDocs(): CancelablePromise<void> {
+	public static getAdminDocs(): CancelablePromise<void> {
 		return __request(OpenAPI, {
 			method: 'GET',
-			url: '/docs/'
+			url: '/admin/docs/'
 		});
 	}
 }

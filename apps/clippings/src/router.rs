@@ -1,7 +1,8 @@
 use accounts::User;
+use aide::axum::ApiRouter;
 use aide::axum::routing::{delete_with, patch_with, post_with};
 use aide::{
-    axum::{routing::get_with, ApiRouter, IntoApiResponse},
+    axum::{routing::get_with, IntoApiResponse},
     transform::TransformOperation,
 };
 use axum::extract::State;
@@ -191,7 +192,7 @@ pub fn change_clipping_item_docs(op: TransformOperation) -> TransformOperation {
 
 pub mod public {}
 
-pub fn routes(app_state: AppState) -> ApiRouter {
+pub fn routes() -> ApiRouter<AppState> {
     ApiRouter::new()
         .api_route(
             "/categories",
@@ -228,6 +229,5 @@ pub fn routes(app_state: AppState) -> ApiRouter {
         .api_route(
             "/items/:item_id",
             patch_with(change_clipping_item, change_clipping_item_docs),
-        )
-        .with_state(app_state)
+        )        
 }

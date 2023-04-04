@@ -1,15 +1,9 @@
 use accounts::routes;
-use shared::testing::{test_app, test_opendal_uploader};
-use shared::AppState;
+use shared::testing::test_app;
 
 #[sqlx::test(migrations = "../../migrations")]
 async fn test_create_a_valid_account(pool: sqlx::PgPool) {
-    let opendal = test_opendal_uploader();
-    let address = test_app(routes(AppState {
-        db_pool: pool,
-        opendal,
-    }))
-    .await;
+    let address = test_app(pool, routes()).await;
 
     let client = reqwest::Client::new();
 
@@ -30,12 +24,7 @@ async fn test_create_a_valid_account(pool: sqlx::PgPool) {
 
 #[sqlx::test(migrations = "../../migrations", fixtures("account"))]
 async fn test_fail_to_create_existing_subdomain(pool: sqlx::PgPool) {
-    let opendal = test_opendal_uploader();
-    let address = test_app(routes(AppState {
-        db_pool: pool,
-        opendal,
-    }))
-    .await;
+    let address = test_app(pool, routes()).await;
 
     let client = reqwest::Client::new();
 
@@ -56,12 +45,7 @@ async fn test_fail_to_create_existing_subdomain(pool: sqlx::PgPool) {
 
 #[sqlx::test(migrations = "../../migrations", fixtures("account"))]
 async fn test_can_retrieve_access_token(pool: sqlx::PgPool) {
-    let opendal = test_opendal_uploader();
-    let address = test_app(routes(AppState {
-        db_pool: pool,
-        opendal,
-    }))
-    .await;
+    let address = test_app(pool, routes()).await;
 
     let client = reqwest::Client::new();
 
@@ -81,12 +65,7 @@ async fn test_can_retrieve_access_token(pool: sqlx::PgPool) {
 
 #[sqlx::test(migrations = "../../migrations", fixtures("account"))]
 async fn test_can_retrieve_access_token_with_subdomain(pool: sqlx::PgPool) {
-    let opendal = test_opendal_uploader();
-    let address = test_app(routes(AppState {
-        db_pool: pool,
-        opendal,
-    }))
-    .await;
+    let address = test_app(pool, routes()).await;
 
     let client = reqwest::Client::new();
 
@@ -106,12 +85,7 @@ async fn test_can_retrieve_access_token_with_subdomain(pool: sqlx::PgPool) {
 
 #[sqlx::test(migrations = "../../migrations", fixtures("account"))]
 async fn test_login_with_wrong_password(pool: sqlx::PgPool) {
-    let opendal = test_opendal_uploader();
-    let address = test_app(routes(AppState {
-        db_pool: pool,
-        opendal,
-    }))
-    .await;
+    let address = test_app(pool, routes()).await;
 
     let client = reqwest::Client::new();
 

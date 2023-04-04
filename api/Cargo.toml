@@ -22,3 +22,4 @@ accounts = { path = "../apps/accounts" }
 blogs = { path = "../apps/blogs" }
 clippings = { path = "../apps/clippings" }
 media = { path = "../apps/media" }
+analytics = { path = "../apps/analytics" }

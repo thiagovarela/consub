@@ -1,10 +1,11 @@
 use accounts::User;
 use aide::axum::routing::{delete_with, get_with, patch_with, post_with};
-use aide::axum::IntoApiResponse;
+use aide::axum::{IntoApiResponse, ApiRouter};
 use aide::transform::TransformOperation;
 use axum::extract::State;
 use axum::extract::{Path, Query};
 use axum::http::StatusCode;
+
 use axum::{debug_handler, Json};
 use axum_extra::extract::Query as ExtraQuery;
 use schemars::JsonSchema;
@@ -282,8 +283,8 @@ pub fn delete_post_image_docs(op: TransformOperation) -> TransformOperation {
         .tag("blogs")
 }
 
-pub fn routes(app_state: AppState) -> aide::axum::ApiRouter {
-    aide::axum::ApiRouter::new()
+pub fn routes() -> ApiRouter<AppState> {
+    ApiRouter::new()
         .api_route(
             "/categories",
             post_with(create_category, create_category_docs),
@@ -324,5 +325,5 @@ pub fn routes(app_state: AppState) -> aide::axum::ApiRouter {
             "/posts/:post_id/images/:post_image_id",
             delete_with(delete_post_image, delete_post_image_docs),
         )
-        .with_state(app_state)
+        .into()
 }

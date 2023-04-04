@@ -1,6 +1,6 @@
 use accounts::Account;
 use aide::{
-    axum::{routing::get_with, ApiRouter, IntoApiResponse},
+    axum::{routing::get_with, IntoApiResponse, ApiRouter},
     transform::TransformOperation,
 };
 use axum::http::StatusCode;
@@ -79,7 +79,7 @@ pub fn get_clipping_item_docs(op: TransformOperation) -> TransformOperation {
         .tag("clippings")
 }
 
-pub fn public_routes(app_state: AppState) -> ApiRouter {
+pub fn public_routes() -> ApiRouter<AppState> {
     ApiRouter::new()
         .api_route(
             "/categories",
@@ -96,6 +96,5 @@ pub fn public_routes(app_state: AppState) -> ApiRouter {
         .api_route(
             "/items/:item_id",
             get_with(get_clipping_item, get_clipping_item_docs),
-        )
-        .with_state(app_state)
+        )        
 }
